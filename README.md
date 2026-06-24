@@ -74,7 +74,9 @@ The server uses curated official/public-agency source records:
 - 보건복지부
 - 중앙치매센터
 - 중앙치매센터 치매상담콜센터
+- 응급의료포털 E-Gen
 - 거주지 시·군·구청 공식 누리집
 - 119
+- 경찰청 112
 
 The server does not diagnose dementia, determine long-term care grade eligibility, guarantee benefits, rank facilities from unverified reviews, or collect resident registration numbers, exact addresses, phone numbers, payment details, or medical records.

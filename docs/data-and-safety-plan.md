@@ -11,6 +11,7 @@ Primary source categories:
 - 복지로
 - 보건복지부
 - 중앙치매센터 and local 치매안심센터 information
+- 응급의료포털 E-Gen
 - Public Data Portal datasets where stable and legally usable
 - Local government senior welfare, transportation, care, and living-support pages
 

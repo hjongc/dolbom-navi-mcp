@@ -20,7 +20,13 @@
   - Confirmed tool names use only PlayMCP-allowed characters.
   - Confirmed every tool exposes required annotation fields.
   - Called `analyze_family_care_situation` successfully.
-  - Repeated local tool call latency after source-registry hardening: avg 3.1ms, max 5.1ms.
+  - Repeated local tool call latency after emergency/source validation hardening: avg 3.4ms, max 6.4ms.
+- Added `npm run validate:playmcp`.
+  - Confirms required deployment files exist.
+  - Confirms MCP SDK is pinned.
+  - Confirms Dockerfile starts the built server and exposes port 3000.
+  - Confirms CI includes smoke and linux/amd64 Docker build.
+  - Confirms official source categories and required official source names are present.
 - Added CI workflow for build, test, smoke, and linux/amd64 Docker build on GitHub-hosted runners.
 
 ### Not Verified Yet

@@ -29,6 +29,9 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Validate PlayMCP readiness
+        run: npm run validate:playmcp
+
       - name: Start server
         run: |
           npm start > /tmp/dolbom-navi.log 2>&1 &

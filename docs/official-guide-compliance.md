@@ -39,8 +39,10 @@ Primary sources include:
 - 복지로
 - 보건복지부
 - 중앙치매센터
+- 응급의료포털 E-Gen
 - 거주지 시·군·구청 공식 누리집
 - 119
+- 경찰청 112
 
 ## Known External Gap
 
