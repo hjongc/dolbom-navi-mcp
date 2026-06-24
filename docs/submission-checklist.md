@@ -57,7 +57,7 @@ Reason: the contest page says PlayMCP server review can take up to 7 business da
 - [x] Family-share summary is concise and readable.
 - [x] No sensitive personal identifiers are requested.
 - [x] MCP server uses Streamable HTTP.
-- [ ] MCP Inspector passes.
+- [x] MCP Inspector CLI passes.
 - [x] MCP protocol version is within PlayMCP-supported range.
 - [x] Every tool has required annotations.
 - [x] Tool names use only allowed characters.
@@ -73,6 +73,7 @@ Reason: the contest page says PlayMCP server review can take up to 7 business da
 - `npm test`: passed, 6 tests.
 - `npm run smoke`: passed against local Streamable HTTP endpoint; checked 6 tools, required annotations, allowed tool-name characters, no forbidden server/tool naming, and repeated call latency under 3 seconds. Latest local repeated-call latency: avg 3.4ms, max 6.4ms.
 - `npm run validate:playmcp`: passed; checks required deploy files, pinned SDK, Dockerfile command, CI smoke/Docker build, and official source registry coverage.
+- MCP Inspector CLI: passed for `tools/list`, representative `tools/call`, `resources/list`, and `resources/read`.
 - `curl http://127.0.0.1:3000/healthz`: passed.
 - `docker build --platform linux/amd64 -t dolbom-navi-mcp:local .`: passed.
 - Container smoke test on `http://127.0.0.1:3100/mcp`: passed; latest repeated-call latency avg 9.5ms, max 18.9ms.

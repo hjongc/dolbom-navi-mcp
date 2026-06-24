@@ -44,7 +44,7 @@ Use the container image path only if Git source build fails or if image-level co
 
 ## Git Source Build Inputs
 
-Use these values as the first draft.
+Use these values for the first PlayMCP in KC registration attempt.
 
 | Field | Value |
 | --- | --- |
@@ -54,6 +54,8 @@ Use these values as the first draft.
 | Branch / ref | main |
 | Dockerfile path | Dockerfile |
 | PAT | Empty if the repository is public |
+
+Repository status: public GitHub repository created and pushed.
 
 ## Container Image Inputs
 
@@ -79,16 +81,18 @@ docker build --platform linux/amd64 -t <image>:<tag> .
 
 ## Blocking Items
 
-- PlayMCP in KC Endpoint issuance is blocked externally if the service still shows `Internal Server Error: Failed to retrieve connector list.`
-- MCP Inspector interactive review still needs to be run before final PlayMCP review.
+- PlayMCP in KC Endpoint issuance is currently blocked externally.
+  - Retested in Microsoft Edge on 2026-06-24 after Kakao/PlayMCP login.
+  - Page still shows `Internal Server Error` and `Failed to retrieve connector list.`
+- MCP Inspector CLI passed. Browser UI review can still be used as a final manual sanity check before PlayMCP review.
 
 ## Next Work
 
-1. Push the repository to GitHub.
+1. Reopen PlayMCP in KC after the external connector-list error is resolved.
 2. Register the Git source build in PlayMCP in KC.
 3. Copy the issued Endpoint URL.
 4. Register the Endpoint URL in PlayMCP as a temporary server.
-5. Run MCP Inspector and PlayMCP temporary-registration tests.
+5. Run PlayMCP temporary-registration tests and, optionally, Inspector browser UI.
 6. Request final PlayMCP review.
 
 ## PlayMCP Server Development Requirements

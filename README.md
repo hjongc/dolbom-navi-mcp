@@ -53,11 +53,19 @@ npm run smoke
 npm run inspect
 ```
 
+For repeatable CLI checks while the server is running:
+
+```bash
+npm run inspect:tools
+npm run inspect:resources
+npm run inspect:source-registry
+```
+
 ## Deploy With PlayMCP In KC
 
 Use the Git source build path:
 
-- Git URL: this repository URL after pushing
+- Git URL: `https://github.com/hjongc/dolbom-navi-mcp`
 - Branch/ref: `main`
 - Dockerfile path: `Dockerfile`
 - PAT: empty if the repository is public

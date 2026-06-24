@@ -12,7 +12,10 @@
     "smoke": "tsx scripts/smoke.ts",
     "validate:playmcp": "tsx scripts/validate-playmcp.ts",
     "verify": "npm run build && npm test && npm run validate:playmcp",
-    "inspect": "npx @modelcontextprotocol/inspector http://127.0.0.1:${PORT:-3000}/mcp"
+    "inspect": "npx @modelcontextprotocol/inspector http://127.0.0.1:${PORT:-3000}/mcp",
+    "inspect:tools": "npx @modelcontextprotocol/inspector --cli --transport http --method tools/list http://127.0.0.1:${PORT:-3000}/mcp",
+    "inspect:resources": "npx @modelcontextprotocol/inspector --cli --transport http --method resources/list http://127.0.0.1:${PORT:-3000}/mcp",
+    "inspect:source-registry": "npx @modelcontextprotocol/inspector --cli --transport http --method resources/read --uri dolbom-navi://sources/official http://127.0.0.1:${PORT:-3000}/mcp"
   },
   "engines": {
     "node": ">=20"

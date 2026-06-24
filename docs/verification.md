@@ -21,6 +21,11 @@
   - Confirmed every tool exposes required annotation fields.
   - Called `analyze_family_care_situation` successfully.
   - Repeated local tool call latency after emergency/source validation hardening: avg 3.4ms, max 6.4ms.
+- Ran MCP Inspector CLI checks against `http://127.0.0.1:3000/mcp`.
+  - `tools/list`: passed and returned 6 annotated tools.
+  - `tools/call` for `analyze_family_care_situation`: passed.
+  - `resources/list`: passed and returned `dolbom-navi://sources/official`.
+  - `resources/read` for the official source registry: passed.
 - Built the deploy image for the PlayMCP container requirement:
   - `docker build --platform linux/amd64 -t dolbom-navi-mcp:local .`
 - Ran the built image locally:
@@ -38,7 +43,7 @@
 
 ### Not Verified Yet
 
-- MCP Inspector interactive review.
-  - The server is compatible with Streamable HTTP smoke testing, but Inspector should still be run before PlayMCP review.
+- MCP Inspector browser UI review.
+  - Inspector CLI passed, but the browser UI can still be used as a final manual sanity check before PlayMCP review.
 - PlayMCP in KC Endpoint issuance.
   - Blocked externally by PlayMCP in KC auth page showing `Internal Server Error: Failed to retrieve connector list.`

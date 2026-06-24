@@ -27,6 +27,7 @@ This repository was shaped by the official contest and PlayMCP guide documents s
 | Avoid advertising behavior | Facility tool avoids rankings, ads, sponsored recommendations, and unverified reviews. |
 | Docker deployment path | Root `Dockerfile` and `.dockerignore` are included. |
 | linux/amd64 image requirement for container path | Docker verification command uses `--platform linux/amd64`; CI is configured to build linux/amd64. |
+| MCP Inspector validation | Inspector CLI passed for tool listing, representative tool call, resource listing, and official source registry read. |
 
 ## Source Trust Policy
 
@@ -53,4 +54,4 @@ Internal Server Error
 Failed to retrieve connector list.
 ```
 
-The repository is prepared for Git source build once that external service is available and a Git URL exists.
+The error was reproduced in Microsoft Edge on 2026-06-24 after PlayMCP login. The repository is public, pushed, verified, and prepared for Git source build once that external service is available.
