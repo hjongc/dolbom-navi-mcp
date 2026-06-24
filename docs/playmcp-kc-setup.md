@@ -50,7 +50,7 @@ Use these values as the first draft.
 | --- | --- |
 | MCP server name | dolbom-navi |
 | Description | Family senior-support navigation MCP for welfare, care, medical, mobility, facility, and local-service guidance. |
-| Git URL | TBD after GitHub repository is created or pushed |
+| Git URL | https://github.com/hjongc/dolbom-navi-mcp |
 | Branch / ref | main |
 | Dockerfile path | Dockerfile |
 | PAT | Empty if the repository is public |
@@ -79,18 +79,17 @@ docker build --platform linux/amd64 -t <image>:<tag> .
 
 ## Blocking Items
 
-- A working MCP server implementation is not yet present in this repository.
-- A Dockerfile is not yet present.
-- A GitHub remote URL is not yet available.
-- PlayMCP in KC login must be completed by the user in the browser.
+- PlayMCP in KC Endpoint issuance is blocked externally if the service still shows `Internal Server Error: Failed to retrieve connector list.`
+- MCP Inspector interactive review still needs to be run before final PlayMCP review.
 
-## Next Local Work
+## Next Work
 
-1. Scaffold MCP server.
-2. Add Dockerfile.
-3. Add local smoke test.
-4. Push to GitHub or provide public Git URL.
-5. Register via PlayMCP in KC.
+1. Push the repository to GitHub.
+2. Register the Git source build in PlayMCP in KC.
+3. Copy the issued Endpoint URL.
+4. Register the Endpoint URL in PlayMCP as a temporary server.
+5. Run MCP Inspector and PlayMCP temporary-registration tests.
+6. Request final PlayMCP review.
 
 ## PlayMCP Server Development Requirements
 
