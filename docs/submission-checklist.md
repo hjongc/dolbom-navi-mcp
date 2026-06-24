@@ -71,6 +71,6 @@ Reason: the contest page says PlayMCP server review can take up to 7 business da
 - `npm install --cache .npm-cache`: passed, 0 vulnerabilities.
 - `npm run build`: passed.
 - `npm test`: passed, 5 tests.
-- `npm run smoke`: passed against local Streamable HTTP endpoint; checked 6 tools, required annotations, allowed tool-name characters, no forbidden server/tool naming, and repeated call latency under 3 seconds.
+- `npm run smoke`: passed against local Streamable HTTP endpoint; checked 6 tools, required annotations, allowed tool-name characters, no forbidden server/tool naming, and repeated call latency under 3 seconds. Latest local repeated-call latency: avg 3.1ms, max 5.1ms.
 - `curl http://127.0.0.1:3000/healthz`: passed.
 - `docker build --platform linux/amd64 -t dolbom-navi-mcp:local .`: not run to completion because the local Docker daemon was not running.

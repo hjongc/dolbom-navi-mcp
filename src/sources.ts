@@ -43,6 +43,16 @@ export const SOURCES: SourceRecord[] = [
     useFor: "노인·가족 관련 민원, 복지서비스, 신청 경로 확인"
   },
   {
+    id: "bokjiro-service",
+    title: "복지서비스 및 맞춤형 복지 정보",
+    category: "welfare",
+    sourceName: "복지로",
+    url: "https://www.bokjiro.go.kr/ssis-tbu/",
+    reviewedAt: REVIEWED_AT,
+    confidence: "official_national",
+    useFor: "복지서비스 검색, 생애주기·가구상황별 복지정보 확인"
+  },
+  {
     id: "mohw-policy",
     title: "보건복지 정책 및 제도 안내",
     category: "medical",
@@ -61,6 +71,16 @@ export const SOURCES: SourceRecord[] = [
     reviewedAt: REVIEWED_AT,
     confidence: "public_agency",
     useFor: "치매 의심·진단 후 가족 체크리스트와 지역 치매안심센터 문의 경로 안내"
+  },
+  {
+    id: "nid-callcenter",
+    title: "치매상담콜센터",
+    category: "dementia",
+    sourceName: "중앙치매센터 치매상담콜센터",
+    url: "https://www.nid.or.kr/main/main.aspx",
+    reviewedAt: REVIEWED_AT,
+    confidence: "public_agency",
+    useFor: "치매 관련 상담, 가족 문의, 치매안심센터 연결 전 초기 상담 경로 안내"
   },
   {
     id: "local-government",
@@ -84,8 +104,20 @@ export const SOURCES: SourceRecord[] = [
   }
 ];
 
+const CATEGORY_COMPANIONS: Partial<Record<SourceCategory, SourceCategory[]>> = {
+  mobility: ["local_government", "medical"],
+  facility: ["long_term_care", "local_government", "medical"],
+  dementia: ["medical"],
+  emergency: ["medical"]
+};
+
 export function sourcesFor(categories: SourceCategory[]): SourceRecord[] {
   const selected = new Set(categories);
+  for (const category of categories) {
+    for (const companion of CATEGORY_COMPANIONS[category] ?? []) {
+      selected.add(companion);
+    }
+  }
   const result = SOURCES.filter(source => selected.has(source.category));
   if (!result.some(source => source.id === "mohw-policy")) {
     result.push(SOURCES.find(source => source.id === "mohw-policy")!);

@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-test-smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      - name: Start server
+        run: |
+          npm start > /tmp/dolbom-navi.log 2>&1 &
+          echo $! > /tmp/dolbom-navi.pid
+          for i in {1..20}; do
+            curl -fsS http://127.0.0.1:3000/healthz && exit 0
+            sleep 1
+          done
+          cat /tmp/dolbom-navi.log
+          exit 1
+
+      - name: Smoke test
+        run: npm run smoke
+
+      - name: Stop server
+        if: always()
+        run: |
+          if [ -f /tmp/dolbom-navi.pid ]; then
+            kill "$(cat /tmp/dolbom-navi.pid)" || true
+          fi
+
+      - name: Docker build
+        run: docker build --platform linux/amd64 -t dolbom-navi-mcp:ci .

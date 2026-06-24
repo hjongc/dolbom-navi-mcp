@@ -70,8 +70,10 @@ The server uses curated official/public-agency source records:
 
 - 국민건강보험공단 노인장기요양보험
 - 정부24
+- 복지로
 - 보건복지부
 - 중앙치매센터
+- 중앙치매센터 치매상담콜센터
 - 거주지 시·군·구청 공식 누리집
 - 119
 
