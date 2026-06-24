@@ -12,6 +12,7 @@ Primary source categories:
 - 보건복지부
 - 중앙치매센터 and local 치매안심센터 information
 - 응급의료포털 E-Gen
+- Official metropolitan mobility support centers for 교통약자 이동지원 대표번호
 - Public Data Portal datasets where stable and legally usable
 - Local government senior welfare, transportation, care, and living-support pages
 
@@ -23,6 +24,7 @@ For each knowledge item, store:
 
 - Source name
 - Source URL
+- Phone number when the official source publishes a representative contact number
 - Retrieved or reviewed date
 - Topic category
 - Region, if applicable

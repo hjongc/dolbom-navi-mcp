@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { SOURCES } from "../src/sources.js";
+import { MOBILITY_CONTACTS, SOURCES } from "../src/sources.js";
 
 const requiredFiles = [
   "Dockerfile",
@@ -49,6 +49,13 @@ for (const category of ["long_term_care", "welfare", "medical", "dementia", "mob
 const sourceNames = SOURCES.map(source => source.sourceName);
 for (const expected of ["국민건강보험공단 노인장기요양보험", "정부24", "복지로", "보건복지부", "중앙치매센터", "응급의료포털 E-Gen", "119", "경찰청 112"]) {
   assert(sourceNames.some(name => name.includes(expected)), `official source missing: ${expected}`);
+}
+
+for (const expected of ["서울", "부산", "경기", "인천", "대구", "대전", "광주", "울산", "세종", "강원", "충남", "전북", "전남", "경북", "경남", "제주"]) {
+  assert(
+    MOBILITY_CONTACTS.some(contact => contact.regions.includes(expected) && contact.phoneNumbers.length > 0),
+    `official mobility contact missing: ${expected}`
+  );
 }
 
 console.log("PlayMCP deployment validation passed");

@@ -1,4 +1,4 @@
-import { renderSources, SourceCategory, sourcesFor } from "./sources.js";
+import { mobilityContactsFor, renderMobilityContacts, renderSources, SourceCategory, sourcesFor } from "./sources.js";
 
 export interface CareProfileInput {
   situation: string;
@@ -39,6 +39,30 @@ function hasAny(text: string, words: string[]): boolean {
 
 function lineItems(items: string[]): string {
   return items.map(item => `- ${item}`).join("\n");
+}
+
+function hasMobilityRoute(routes: RoutedArea[]): boolean {
+  return routes.some(route => route.area === "mobility");
+}
+
+function mobilityContactSection(region: string, routes: RoutedArea[]): string {
+  if (!hasMobilityRoute(routes)) return "";
+
+  const contacts = mobilityContactsFor(region);
+  if (contacts.length > 0) {
+    return [
+      "## 지역 교통 문의처",
+      renderMobilityContacts(contacts),
+      "교통약자 이동지원은 지역별 이용대상, 등록서류, 예약방식, 운행구역이 다르므로 전화 전 공식 사이트의 이용대상과 서류를 함께 확인하세요."
+    ].join("\n");
+  }
+
+  return [
+    "## 지역 교통 문의처",
+    region === "미확인"
+      ? "- 거주지 시·도명이 확인되면 해당 지역 공식 교통약자 이동지원센터 대표번호를 우선 안내할 수 있습니다."
+      : `- ${region}의 공식 교통약자 이동지원센터 번호가 내장 목록에 아직 없습니다. 정부24 지자체 누리집 또는 거주지 시·군·구청 교통·복지 담당 부서에서 최신 번호를 확인하세요.`
+  ].join("\n");
 }
 
 function normalizeProfile(input: CareProfileInput): Required<CareProfileInput> {
@@ -169,6 +193,8 @@ export function analyzeFamilyCareSituation(input: CareProfileInput): string {
     "## 이번 주 첫 행동",
     routes.map(route => `- ${route.label}: ${route.firstContact}`).join("\n"),
     "",
+    mobilityContactSection(profile.region, routes),
+    "",
     "## 추가로 확인하면 정확해지는 정보",
     missing.length > 0 ? lineItems(missing) : "- 현재 입력만으로 1차 경로 분류가 가능합니다.",
     profile.region === "미확인" ? "\n먼저 한 가지만 확인할게요: 어르신의 거주지 시·군·구가 어디인가요?" : "",
@@ -195,6 +221,8 @@ export function routeSupportOptions(input: CareProfileInput & { mainConcern?: st
       "장기요양등급 신청/보유 여부 확인",
       "병원 이동, 식사, 목욕, 복약, 배회 등 일상 지원 필요도를 가족끼리 합의"
     ]),
+    "",
+    mobilityContactSection(profile.region, routes),
     "",
     "## 공식 출처",
     renderSources(sourcesFor(routes.map(route => route.area)))

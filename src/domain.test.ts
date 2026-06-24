@@ -6,7 +6,7 @@ import {
   compareCareOrSupportOptions,
   makeFamilyShareSummary
 } from "./domain.js";
-import { renderSources } from "./sources.js";
+import { mobilityContactsFor, renderSources } from "./sources.js";
 
 test("analyzes broad family care situation across multiple support domains", () => {
   const output = analyzeFamilyCareSituation({
@@ -39,6 +39,26 @@ test("missing region asks one concise follow-up question", () => {
   });
 
   assert.match(output, /거주지 시·군·구가 어디인가요\?/);
+});
+
+test("mobility route includes verified local mobility contact when region matches", () => {
+  const output = analyzeFamilyCareSituation({
+    situation: "아버지가 병원 이동이 힘든데 교통 지원이나 동행 서비스가 있을까요?",
+    region: "서울 관악구",
+    ageRange: "80대"
+  });
+
+  assert.match(output, /지역 교통 문의처/);
+  assert.match(output, /서울시설공단 장애인콜택시/);
+  assert.match(output, /1588-4388/);
+});
+
+test("mobility contact registry maps province aliases", () => {
+  const contacts = mobilityContactsFor("경기도 성남시 분당구");
+
+  assert.equal(contacts.length, 1);
+  assert.equal(contacts[0]?.centerName, "경기도 교통약자 광역이동지원센터");
+  assert.deepEqual(contacts[0]?.phoneNumbers.slice(0, 1), ["1666-0420"]);
 });
 
 test("emergency-like scenario prioritizes safety", () => {

@@ -61,6 +61,7 @@ Output:
 - Matched support areas
 - Why each area may be relevant
 - Recommended first contact or source category
+- Official regional mobility center contact when a verified representative number is available
 - Missing facts to confirm
 - This week's action checklist
 
@@ -158,6 +159,7 @@ Priority 1 official sources:
 - 중앙치매센터 and 치매안심센터 sources: dementia support and local dementia service pathways.
 - 보건복지부: senior care policy and official announcements.
 - Local government senior welfare pages: region-specific welfare, mobility, care, and living support programs.
+- Official metropolitan 교통약자 이동지원센터 pages for representative mobility-support contact numbers.
 
 Priority 2 structured/public sources:
 

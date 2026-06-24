@@ -84,6 +84,7 @@ The server uses curated official/public-agency source records:
 - 중앙치매센터 치매상담콜센터
 - 응급의료포털 E-Gen
 - 거주지 시·군·구청 공식 누리집
+- 광역 교통약자 이동지원센터 대표번호 레지스트리
 - 119
 - 경찰청 112
 
