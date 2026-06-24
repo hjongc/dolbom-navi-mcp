@@ -1,0 +1,29 @@
+{
+  "name": "dolbom-navi-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Dolbom Navi remote MCP server for Korean family senior-support navigation.",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/src/server.js",
+    "test": "npm run build && node --test dist/**/*.test.js",
+    "smoke": "tsx scripts/smoke.ts",
+    "inspect": "npx @modelcontextprotocol/inspector http://127.0.0.1:${PORT:-3000}/mcp"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "express": "5.1.0",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/express": "5.0.3",
+    "@types/node": "24.0.4",
+    "tsx": "4.20.3",
+    "typescript": "5.8.3"
+  }
+}
