@@ -8,7 +8,8 @@
 - Confirmed dependency audit result: 0 vulnerabilities.
 - Built TypeScript with `npm run build`.
 - Ran domain tests with `npm test`.
-  - 6 tests passed.
+  - 7 tests passed.
+  - Includes explicit failure coverage for empty official-source rendering.
 - Started the Streamable HTTP server with `npm start`.
 - Confirmed health endpoint:
   - `GET /healthz`

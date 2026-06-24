@@ -6,6 +6,7 @@ import {
   compareCareOrSupportOptions,
   makeFamilyShareSummary
 } from "./domain.js";
+import { renderSources } from "./sources.js";
 
 test("analyzes broad family care situation across multiple support domains", () => {
   const output = analyzeFamilyCareSituation({
@@ -69,4 +70,8 @@ test("family share summary is concise and does not request sensitive identifiers
 
   assert.match(output, /가족 공유용 요약/);
   assert.doesNotMatch(output, /주민등록/);
+});
+
+test("source unavailable state fails clearly", () => {
+  assert.throws(() => renderSources([]), /Official source registry returned no sources/);
 });

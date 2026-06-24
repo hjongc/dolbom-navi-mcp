@@ -166,6 +166,10 @@ export function sourcesFor(categories: SourceCategory[]): SourceRecord[] {
 }
 
 export function renderSources(sources: SourceRecord[]): string {
+  if (sources.length === 0) {
+    throw new Error("Official source registry returned no sources for this response.");
+  }
+
   return sources
     .map(source => `- ${source.sourceName}: ${source.url} (검토일: ${source.reviewedAt})`)
     .join("\n");

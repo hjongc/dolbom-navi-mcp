@@ -53,7 +53,7 @@ Reason: the contest page says PlayMCP server review can take up to 7 business da
 - [x] Facility comparison flow avoids fabricated ranking.
 - [x] Missing region asks a concise follow-up.
 - [x] Emergency-like scenario triggers safety response.
-- [ ] Source unavailable state fails clearly.
+- [x] Source unavailable state fails clearly.
 - [x] Family-share summary is concise and readable.
 - [x] No sensitive personal identifiers are requested.
 - [x] MCP server uses Streamable HTTP.
@@ -70,7 +70,8 @@ Reason: the contest page says PlayMCP server review can take up to 7 business da
 
 - `npm install --cache .npm-cache`: passed, 0 vulnerabilities.
 - `npm run build`: passed.
-- `npm test`: passed, 6 tests.
+- `npm test`: passed, 7 tests.
+- Source unavailable failure path: covered by `source unavailable state fails clearly`.
 - `npm run smoke`: passed against local Streamable HTTP endpoint; checked 6 tools, required annotations, allowed tool-name characters, no forbidden server/tool naming, and repeated call latency under 3 seconds. Latest local repeated-call latency: avg 3.4ms, max 6.4ms.
 - `npm run validate:playmcp`: passed; checks required deploy files, pinned SDK, Dockerfile command, CI smoke/Docker build, and official source registry coverage.
 - MCP Inspector CLI: passed for `tools/list`, representative `tools/call`, `resources/list`, and `resources/read`.
