@@ -6,9 +6,13 @@ import * as z from "zod/v4";
 import {
   analyzeFamilyCareSituation,
   buildDementiaCareChecklist,
+  checkUrgentCareNeed,
   compareCareOrSupportOptions,
+  explainCareServiceTypes,
   explainLongTermCarePath,
+  findLocalSupportContacts,
   makeFamilyShareSummary,
+  prepareInstitutionCallScript,
   routeSupportOptions
 } from "./domain.js";
 import { SOURCES } from "./sources.js";
@@ -41,6 +45,14 @@ const supportAreaSchema = z
   .enum(["welfare", "medical", "care", "mobility", "facility", "administration", "unknown"])
   .optional()
   .describe("우선 확인하고 싶은 영역입니다. welfare=복지, medical=의료, care=장기요양·돌봄, mobility=이동·교통, facility=시설, administration=행정, unknown=미확인.");
+const institutionTypeSchema = z
+  .enum(["nhis", "dementia_center", "local_government", "medical_provider", "mobility_center", "care_facility", "unknown"])
+  .optional()
+  .describe("전화하려는 기관 유형입니다. nhis=장기요양보험, dementia_center=치매안심센터, local_government=주민센터·시군구청, medical_provider=의료기관, mobility_center=교통약자 이동지원센터, care_facility=요양시설·돌봄기관, unknown=미정.");
+const serviceTypeSchema = z
+  .enum(["nursing_home", "care_hospital", "day_night_care", "home_visit_care", "short_term_care", "mobility_support", "hospital_companion", "unknown"])
+  .optional()
+  .describe("비교하거나 설명할 서비스 유형입니다. nursing_home=요양원, care_hospital=요양병원, day_night_care=주야간보호, home_visit_care=방문요양, short_term_care=단기보호, mobility_support=교통약자 이동지원, hospital_companion=병원동행, unknown=미정.");
 
 function readOnlyAnnotations(title: string): ToolAnnotations {
   return {
@@ -172,6 +184,74 @@ export function createServer(): McpServer {
       annotations: readOnlyAnnotations("돌봄 선택지 비교")
     },
     async input => textResult(compareCareOrSupportOptions(input))
+  );
+
+  server.registerTool(
+    "find_local_support_contacts",
+    {
+      title: "지역 문의처 찾기",
+      description:
+        "돌봄내비가 어르신 거주지와 돌봄 상황을 기준으로 주민센터·시군구청·장기요양보험·치매안심센터·교통약자 이동지원 등 공식 문의 경로를 정리합니다.",
+      inputSchema: {
+        situation: situationSchema,
+        region: regionSchema,
+        supportArea: supportAreaSchema,
+        mobilityStatus: mobilityStatusSchema
+      },
+      annotations: readOnlyAnnotations("지역 문의처 찾기")
+    },
+    async input => textResult(findLocalSupportContacts(input))
+  );
+
+  server.registerTool(
+    "prepare_institution_call_script",
+    {
+      title: "기관 전화 스크립트",
+      description:
+        "돌봄내비가 공단·주민센터·치매안심센터·교통지원센터·요양시설에 전화하기 전에 첫 문장, 확인 질문, 메모 항목을 공식 확인 중심으로 준비합니다.",
+      inputSchema: {
+        situation: situationSchema,
+        institutionType: institutionTypeSchema,
+        region: regionSchema,
+        mainConcern: z.string().optional().describe("전화에서 가장 먼저 확인하려는 고민입니다. 예: 장기요양 신청, 병원 이동, 치매 상담, 요양원 비용.")
+      },
+      annotations: readOnlyAnnotations("기관 전화 스크립트")
+    },
+    async input => textResult(prepareInstitutionCallScript(input))
+  );
+
+  server.registerTool(
+    "check_urgent_care_need",
+    {
+      title: "긴급도 확인",
+      description:
+        "돌봄내비가 배회·실종 우려, 낙상, 의식 변화, 호흡곤란, 갑작스러운 인지 변화처럼 먼저 112·119 또는 의료기관 확인이 필요한 신호를 분리합니다.",
+      inputSchema: {
+        situation: situationSchema,
+        dementiaStatus: dementiaStatusSchema,
+        recentChange: z.string().optional().describe("최근 갑자기 달라진 증상이나 행동이 있다면 적어주세요. 예: 낙상, 의식 변화, 수면 변화, 복약 실수."),
+        safetyConcern: z.string().optional().describe("실종, 배회, 자해, 폭력, 혼자 외출처럼 가족이 걱정하는 안전 문제를 적어주세요.")
+      },
+      annotations: readOnlyAnnotations("긴급도 확인")
+    },
+    async input => textResult(checkUrgentCareNeed(input))
+  );
+
+  server.registerTool(
+    "explain_care_service_types",
+    {
+      title: "돌봄 서비스 유형 설명",
+      description:
+        "돌봄내비가 요양원·요양병원·주야간보호·방문요양·단기보호·교통약자 이동지원·병원동행의 차이와 공식 확인 질문을 정리합니다.",
+      inputSchema: {
+        situation: z.string().optional().describe("어르신의 돌봄 상황을 자연어로 적어주세요. 민감정보는 넣지 않습니다."),
+        serviceType: serviceTypeSchema,
+        region: regionSchema,
+        careNeeds: z.string().optional().describe("필요한 지원입니다. 예: 식사 도움, 배회 대응, 야간 대응, 병원 이동, 재활.")
+      },
+      annotations: readOnlyAnnotations("돌봄 서비스 유형 설명")
+    },
+    async input => textResult(explainCareServiceTypes(input))
   );
 
   server.registerTool(

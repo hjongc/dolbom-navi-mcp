@@ -68,6 +68,16 @@ Reason: the contest page says PlayMCP server review can take up to 7 business da
 
 ## Current Verification
 
+- Latest 10-tool scenario expansion on 2026-06-25:
+  - Final tool set: existing broad analysis, routing, long-term-care path, dementia checklist, care option comparison, and family-share summary tools remain.
+  - Added tools: `find_local_support_contacts`, `prepare_institution_call_script`, `check_urgent_care_need`, and `explain_care_service_types`.
+  - `npm run verify`: passed, 21 tests.
+  - `MCP_ENDPOINT=http://127.0.0.1:3920/mcp npm run smoke`: passed; protocol `2025-11-25`, 10 tools, avg latency 2.8ms, max 5.9ms.
+  - `MCP_ENDPOINT=http://127.0.0.1:3920/mcp npm run quality:eval`: passed deterministic MCP scenarios for existing safety behavior plus local contact lookup, call-script preparation, urgent triage, and service-type explanation.
+  - `npm run source:check`: passed for official national/public sources and 16 regional mobility-contact URLs.
+  - Not run in this local shell: `npm run llm:eval`, because `OPENROUTER_API_KEY` was not set.
+  - Remote endpoint still needs redeploy/recheck before claiming the public PlayMCP server has the 10-tool build.
+
 - `npm install --cache .npm-cache`: passed, 0 vulnerabilities.
 - `npm run build`: passed.
 - `npm test`: passed, 17 tests.

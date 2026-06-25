@@ -18,6 +18,25 @@ export interface RoutedArea {
   firstContact: string;
 }
 
+export type InstitutionType =
+  | "nhis"
+  | "dementia_center"
+  | "local_government"
+  | "medical_provider"
+  | "mobility_center"
+  | "care_facility"
+  | "unknown";
+
+export type CareServiceType =
+  | "nursing_home"
+  | "care_hospital"
+  | "day_night_care"
+  | "home_visit_care"
+  | "short_term_care"
+  | "mobility_support"
+  | "hospital_companion"
+  | "unknown";
+
 const EMERGENCY_PATTERNS = [
   /실종/,
   /사라졌/,
@@ -29,7 +48,12 @@ const EMERGENCY_PATTERNS = [
   /쓰러/,
   /급성/,
   /배회/,
-  /길을 잃/
+  /길을 잃/,
+  /낙상/,
+  /마비/,
+  /가슴\s*통증/,
+  /말이\s*어눌/,
+  /섬망/
 ];
 
 function hasAny(text: string, words: string[]): boolean {
@@ -160,6 +184,138 @@ function mobilityContactSection(region: string, routes: RoutedArea[]): string {
       ? "- 거주지 시·도명이 확인되면 해당 지역 공식 교통약자 이동지원센터 대표번호를 우선 안내할 수 있습니다."
       : `- ${region}의 공식 교통약자 이동지원센터 번호가 내장 목록에 아직 없습니다. 정부24 지자체 누리집 또는 거주지 시·군·구청 교통·복지 담당 부서에서 최신 번호를 확인하세요.`
   ].join("\n");
+}
+
+function supportAreaCategories(area?: CareProfileInput["supportArea"]): SourceCategory[] {
+  if (area === "welfare") return ["welfare", "local_government"];
+  if (area === "medical") return ["medical"];
+  if (area === "care") return ["long_term_care", "local_government"];
+  if (area === "mobility") return ["mobility", "local_government"];
+  if (area === "facility") return ["facility", "long_term_care", "medical"];
+  if (area === "administration") return ["local_government"];
+  return ["welfare", "long_term_care", "dementia", "mobility", "local_government"];
+}
+
+function renderInstitutionType(type: InstitutionType): string {
+  return {
+    nhis: "국민건강보험공단 노인장기요양보험",
+    dementia_center: "치매안심센터·중앙치매센터",
+    local_government: "주민센터·시군구청",
+    medical_provider: "의료기관·보건의료 상담 경로",
+    mobility_center: "교통약자 이동지원센터",
+    care_facility: "요양시설·돌봄 서비스 기관",
+    unknown: "확인할 기관 미정"
+  }[type];
+}
+
+function categoriesForInstitution(type: InstitutionType): SourceCategory[] {
+  const categories: Record<InstitutionType, SourceCategory[]> = {
+    nhis: ["long_term_care"],
+    dementia_center: ["dementia", "medical"],
+    local_government: ["local_government", "welfare"],
+    medical_provider: ["medical"],
+    mobility_center: ["mobility", "local_government"],
+    care_facility: ["facility", "long_term_care", "medical"],
+    unknown: ["local_government", "welfare", "long_term_care"]
+  };
+  return categories[type];
+}
+
+function callQuestionsFor(type: InstitutionType, concern: string, region: string): string[] {
+  const common = [
+    `이 상황(${concern})에서 먼저 확인해야 할 공식 절차나 담당 창구가 어디인가요?`,
+    "전화 뒤에 가족이 준비해야 할 서류, 관찰 메모, 방문 일정이 있나요?",
+    "대상 여부나 비용은 어떤 기준으로 최종 확인되나요?"
+  ];
+
+  const byType: Record<InstitutionType, string[]> = {
+    nhis: [
+      "장기요양인정 신청 전 가족이 기록해 둘 일상생활 어려움은 무엇인가요?",
+      "등급 결과 전후로 이용 가능한 급여나 기관 확인은 어디서 하나요?",
+      "신청, 방문조사, 의사소견서 등 다음 단계별 예상 순서는 어떻게 되나요?"
+    ],
+    dementia_center: [
+      "치매를 확정하려는 것이 아니라 상담·검사 경로를 확인하려면 어디로 예약해야 하나요?",
+      "배회, 수면 변화, 기억저하처럼 가족이 관찰한 내용을 어떤 형식으로 가져가면 좋나요?",
+      `${region}에서 이용 가능한 치매안심센터 프로그램이나 가족 상담이 있나요?`
+    ],
+    local_government: [
+      `${region} 기준 노인복지, 병원동행, 돌봄, 교통 지원 중 어느 부서가 담당하나요?`,
+      "연령, 거주지, 소득, 장애 등록, 장기요양등급 등 확인해야 할 조건은 무엇인가요?",
+      "온라인 신청과 방문 신청 중 어떤 경로가 공식 절차인가요?"
+    ],
+    medical_provider: [
+      "현재 증상이 응급실, 외래, 보건소, 전문기관 중 어디로 가야 하는 상황인가요?",
+      "복용약, 최근 낙상, 감염, 수면 변화, 인지 변화 중 진료 전에 정리할 것은 무엇인가요?",
+      "진단명이나 치료 방향은 의료진 상담 후 어떻게 가족에게 설명하면 좋나요?"
+    ],
+    mobility_center: [
+      `${region}에서 교통약자 이동지원 등록 대상과 필요한 서류는 무엇인가요?`,
+      "병원 이동, 휠체어, 보호자 동승, 예약 가능 시간과 운행 구역 제한은 어떻게 되나요?",
+      "당일 이용이 어려울 때 대체로 문의할 수 있는 지자체 사업이나 병원동행 서비스가 있나요?"
+    ],
+    care_facility: [
+      "어르신 상태에서 입소, 주야간보호, 방문요양 중 어느 유형이 맞는지 상담 기준은 무엇인가요?",
+      "야간 대응, 낙상·배회 대응, 응급 이송, 가족 연락 기준은 어떻게 운영되나요?",
+      "월 비용, 추가 비용, 계약 전 확인 서류, 환불·퇴소 조건을 문서로 받을 수 있나요?"
+    ],
+    unknown: common
+  };
+
+  return [...common, ...byType[type]];
+}
+
+function renderCareServiceType(type: CareServiceType): { label: string; summary: string; useWhen: string; verify: string[] } {
+  return {
+    nursing_home: {
+      label: "요양원",
+      summary: "일상생활 돌봄과 장기요양급여 이용을 중심으로 보는 장기요양기관 유형입니다.",
+      useWhen: "식사, 목욕, 이동, 인지저하, 배회 대응처럼 생활 돌봄이 지속적으로 필요한지 확인할 때",
+      verify: ["장기요양기관 정보", "입소 가능 여부", "야간·응급 대응", "본인부담과 추가 비용"]
+    },
+    care_hospital: {
+      label: "요양병원",
+      summary: "의료기관 성격이 강해 진료, 처치, 재활, 의학적 관리 필요성을 함께 봐야 합니다.",
+      useWhen: "치료·재활·의학적 관리 필요성이 돌봄보다 더 큰지 의료진과 상의할 때",
+      verify: ["진료 필요성", "입원 적합성", "간병 구조", "비급여·간병비", "퇴원 후 돌봄 연계"]
+    },
+    day_night_care: {
+      label: "주야간보호",
+      summary: "낮 또는 일정 시간 동안 기관에서 돌봄과 활동 지원을 받는 방식입니다.",
+      useWhen: "가족이 함께 살거나 밤에는 집에 계시지만 낮 시간 돌봄 공백이 클 때",
+      verify: ["송영 가능 지역", "운영 시간", "인지·신체 프로그램", "식사·투약 지원", "등급별 이용 조건"]
+    },
+    home_visit_care: {
+      label: "방문요양",
+      summary: "요양보호사가 집으로 방문해 일상생활 지원을 제공하는 방식입니다.",
+      useWhen: "집에서 생활을 유지하면서 식사, 목욕, 이동, 청소 등 일부 도움이 필요할 때",
+      verify: ["방문 가능 시간", "제공 서비스 범위", "담당자 교체 기준", "등급·급여 조건"]
+    },
+    short_term_care: {
+      label: "단기보호",
+      summary: "가족 사정이나 돌봄 공백이 생겼을 때 일정 기간 기관 보호를 검토하는 유형입니다.",
+      useWhen: "보호자 입원, 출장, 번아웃, 임시 돌봄 공백처럼 기간이 정해진 지원이 필요할 때",
+      verify: ["이용 가능 기간", "예약 가능 여부", "응급 대응", "비용", "퇴소 후 연계"]
+    },
+    mobility_support: {
+      label: "교통약자 이동지원",
+      summary: "지역별 등록 기준과 예약 방식에 따라 병원·외출 이동을 지원하는 교통 서비스입니다.",
+      useWhen: "휠체어, 보행 어려움, 대중교통 이용 곤란 등으로 이동 자체가 문제일 때",
+      verify: ["지역별 등록 대상", "필요 서류", "예약 방식", "운행 구역", "보호자 동승"]
+    },
+    hospital_companion: {
+      label: "병원동행",
+      summary: "병원 방문 과정에서 이동, 접수, 수납, 귀가 동행을 돕는 지역·민간 혼합 서비스입니다.",
+      useWhen: "진료는 가능하지만 보호자가 매번 동행하기 어렵거나 이동 과정이 복잡할 때",
+      verify: ["지자체 사업 여부", "이용 대상", "본인부담", "동행 범위", "의료 판단 대행 금지"]
+    },
+    unknown: {
+      label: "유형 미정",
+      summary: "먼저 돌봄의 중심 문제가 의료, 생활지원, 이동, 임시보호 중 무엇인지 나눠야 합니다.",
+      useWhen: "요양원, 요양병원, 주야간보호, 방문요양 중 무엇이 맞는지 아직 모를 때",
+      verify: ["가장 힘든 일상동작", "의료진 확인 필요성", "장기요양등급 상태", "거주지와 이동 가능성"]
+    }
+  }[type];
 }
 
 function normalizeProfile(input: CareProfileInput): Required<CareProfileInput> {
@@ -499,6 +655,183 @@ export function compareCareOrSupportOptions(input: { region?: string; desiredTyp
     "",
     "## 공식 출처",
     renderSources(sourcesFor(["facility", "long_term_care", "local_government", "medical"]))
+  ].join("\n");
+}
+
+export function findLocalSupportContacts(input: {
+  situation: string;
+  region?: string;
+  supportArea?: CareProfileInput["supportArea"];
+  mobilityStatus?: string;
+}): string {
+  const situation = sanitizeUserText(input.situation.trim());
+  const region = cleanOptionalText(input.region);
+  const area = input.supportArea || "unknown";
+  const routes = routeAreas({
+    situation,
+    region,
+    supportArea: area,
+    mobilityStatus: input.mobilityStatus
+  });
+  const categories = supportAreaCategories(area);
+
+  return [
+    "## 지역 문의처 찾기",
+    `상황: ${situation}`,
+    `지역: ${region}`,
+    "",
+    "## 우선 문의 순서",
+    routes
+      .slice(0, 4)
+      .map((route, index) => `${index + 1}. ${route.label}\n   - 시작 경로: ${route.firstContact}\n   - 이유: ${route.reason}`)
+      .join("\n"),
+    "",
+    mobilityContactSection(region, routes),
+    "",
+    region === "미확인"
+      ? "## 한 가지 확인 질문\n지역 서비스는 거주지 기준으로 달라집니다. 어르신의 거주지 시·군·구를 확인하면 교통·복지·돌봄 문의처를 더 구체화할 수 있습니다."
+      : "## 전화 전 준비\n- 거주지와 실제 돌봄 장소가 같은지 확인\n- 장기요양등급 신청/보유 여부 확인\n- 병원 이동, 식사, 목욕, 복약, 인지 변화 중 가장 급한 문제 1가지를 정리\n- 민감번호, 정확한 주소, 의료기록 파일은 이 도구에 입력하지 않고 공식 기관 문의 때만 필요한 범위에서 확인",
+    "",
+    "## 공식 출처",
+    renderSources(sourcesFor([...categories, ...routes.map(route => route.area)])),
+    "",
+    officialConfirmationNotice()
+  ].join("\n");
+}
+
+export function prepareInstitutionCallScript(input: {
+  situation: string;
+  institutionType?: InstitutionType;
+  region?: string;
+  mainConcern?: string;
+}): string {
+  const situation = sanitizeUserText(input.situation.trim());
+  const region = cleanOptionalText(input.region);
+  const institutionType = input.institutionType || "unknown";
+  const concern = cleanOptionalText(input.mainConcern, situation);
+  const questions = callQuestionsFor(institutionType, concern, region);
+
+  return [
+    "## 기관 전화 준비",
+    `문의 대상: ${renderInstitutionType(institutionType)}`,
+    `지역: ${region}`,
+    `핵심 고민: ${concern}`,
+    "",
+    "## 전화 첫 문장",
+    `안녕하세요. ${region}에 계신 어르신 돌봄 문제로 문의드립니다. ${concern} 상황인데, 어느 공식 절차나 담당 창구부터 확인해야 하는지 안내받고 싶습니다.`,
+    "",
+    "## 꼭 물어볼 질문",
+    lineItems(questions),
+    "",
+    "## 전화 중 남길 메모",
+    lineItems([
+      "담당 기관명과 부서명",
+      "다음 연락처 또는 공식 사이트 경로",
+      "준비해야 할 서류·관찰 메모",
+      "대상 여부를 최종 판단하는 기관과 기준",
+      "다음 행동의 날짜와 담당자"
+    ]),
+    "",
+    "## 주의",
+    "전화 스크립트는 상담 준비용입니다. 주민등록번호, 정확한 주소, 의료기록 파일, 결제 정보는 이 도구에 입력하지 말고 공식 절차에서 필요한 범위로만 제출하세요.",
+    "",
+    "## 공식 출처",
+    renderSources(sourcesFor(categoriesForInstitution(institutionType))),
+    "",
+    officialConfirmationNotice()
+  ].join("\n");
+}
+
+export function checkUrgentCareNeed(input: {
+  situation: string;
+  dementiaStatus?: CareProfileInput["dementiaStatus"];
+  recentChange?: string;
+  safetyConcern?: string;
+}): string {
+  const situation = sanitizeUserText(input.situation.trim());
+  const recentChange = cleanOptionalDetail(input.recentChange);
+  const safetyConcern = cleanOptionalDetail(input.safetyConcern);
+  const combined = [situation, recentChange, safetyConcern, input.dementiaStatus || ""].join(" ");
+  const urgent = detectEmergency(combined) || input.dementiaStatus === "severe_symptoms";
+
+  if (urgent) {
+    return [
+      "## 긴급도 확인",
+      "현재 입력에는 먼저 안전 확인이 필요한 신호가 있습니다. 복지·요양 절차보다 위치 확인, 생명·신체 안전, 급성 증상 대응이 우선입니다.",
+      "",
+      "## 지금 할 일",
+      lineItems([
+        "실종·배회·범죄 위험은 112에 연락",
+        "호흡곤란, 의식저하, 갑작스러운 마비·가슴 통증, 심한 낙상, 급성 혼란은 119 또는 가까운 응급의료기관에 연락",
+        "가족 한 명은 마지막 확인 위치, 시간, 복장, 복용약, 최근 변화, 진단 여부를 짧게 정리",
+        "안전이 확보된 뒤 치매안심센터, 의료기관, 장기요양보험, 지자체 돌봄 창구를 순서대로 확인"
+      ]),
+      "",
+      "## 공식 출처",
+      renderSources(sourcesFor(["emergency", "medical", "dementia"])),
+      "",
+      officialConfirmationNotice()
+    ].join("\n");
+  }
+
+  return [
+    "## 긴급도 확인",
+    "입력만으로 즉시 112·119가 필요한 신호는 뚜렷하지 않습니다. 다만 고령자 상태 변화는 빠르게 달라질 수 있으므로 가족이 관찰 기준을 정해 두는 것이 좋습니다.",
+    "",
+    "## 오늘 확인할 기준",
+    lineItems([
+      "갑작스러운 의식 변화, 호흡곤란, 마비, 가슴 통증, 심한 낙상, 실종·배회 위험이 생기면 즉시 119 또는 112",
+      "기억저하, 수면 변화, 복약 실수, 외출 후 길 잃음이 반복되면 의료기관 또는 치매안심센터 상담",
+      "식사, 목욕, 이동, 배변, 복약이 지속적으로 어려우면 장기요양·지자체 돌봄 경로 확인",
+      "병원 이동이나 외출이 어려우면 지역 교통약자 이동지원과 병원동행 사업 확인"
+    ]),
+    "",
+    "## 공식 출처",
+    renderSources(sourcesFor(["emergency", "medical", "dementia", "long_term_care", "mobility"])),
+    "",
+    officialConfirmationNotice()
+  ].join("\n");
+}
+
+export function explainCareServiceTypes(input: {
+  situation?: string;
+  serviceType?: CareServiceType;
+  region?: string;
+  careNeeds?: string;
+}): string {
+  const type = input.serviceType || "unknown";
+  const service = renderCareServiceType(type);
+  const region = cleanOptionalText(input.region);
+  const careNeeds = cleanOptionalDetail(input.careNeeds);
+  const situation = cleanOptionalDetail(input.situation);
+
+  const comparisonTypes: CareServiceType[] =
+    type === "unknown"
+      ? ["nursing_home", "care_hospital", "day_night_care", "home_visit_care", "mobility_support", "hospital_companion"]
+      : [type];
+
+  return [
+    "## 돌봄 서비스 유형 설명",
+    situation ? `상황: ${situation}` : "상황: 미확인",
+    `지역: ${region}`,
+    careNeeds ? `필요 지원: ${careNeeds}` : "필요 지원: 미확인",
+    "",
+    "## 핵심 구분",
+    comparisonTypes
+      .map(item => {
+        const detail = renderCareServiceType(item);
+        return `- ${detail.label}: ${detail.summary}\n  - 맞는 경우: ${detail.useWhen}\n  - 공식 확인: ${detail.verify.join(", ")}`;
+      })
+      .join("\n"),
+    "",
+    type === "unknown"
+      ? "## 먼저 나눌 질문\n- 의료 처치와 입원 필요성이 큰가요, 일상생활 돌봄 공백이 큰가요?\n- 집에서 지내는 것을 유지하고 싶은가요, 일정 시간 기관 이용이 필요한가요?\n- 이동 자체가 어려운가요, 병원 방문 과정의 동행이 어려운가요?"
+      : `## 이 유형을 볼 때 물어볼 질문\n- ${service.label}이 현재 필요와 맞는지 공식 기준이나 상담 답변으로 확인할 수 있나요?\n- 비용, 이용 조건, 응급 대응, 가족 연락 방식이 문서로 설명되나요?\n- 의료 판단이나 장기요양등급 승인 여부를 이 기관이 확정한다고 말하지는 않나요?`,
+    "",
+    "## 공식 출처",
+    renderSources(sourcesFor(["facility", "long_term_care", "medical", "mobility", "local_government"])),
+    "",
+    officialConfirmationNotice()
   ].join("\n");
 }
 

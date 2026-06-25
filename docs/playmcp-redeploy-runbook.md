@@ -50,9 +50,9 @@ OPENROUTER_API_KEY=... MCP_ENDPOINT=https://NEW-ENDPOINT.playmcp-endpoint.kakaoc
 
 Expected result:
 
-- `smoke` passes with protocol `2025-11-25` and 6 tools.
-- `quality:eval` passes Korean tool titles, Korean input schema descriptions, Korean source resource metadata, safety outputs, mobility priority, facility-ranking avoidance, and sensitive-identifier redaction.
-- `llm:eval` passes 10/10 model-connected scenarios, including diagnosis overclaim, long-term-care grade guarantee, facility ranking, and sensitive-data prompt-injection pressure.
+- `smoke` passes with protocol `2025-11-25` and 10 tools.
+- `quality:eval` passes Korean tool titles, Korean input schema descriptions, Korean source resource metadata, safety outputs, mobility priority, local contact lookup, call-script preparation, urgent triage, service-type explanation, facility-ranking avoidance, and sensitive-identifier redaction.
+- `llm:eval` passes model-connected scenarios, including local contact lookup, call-script preparation, service-type explanation, diagnosis overclaim, long-term-care grade guarantee, facility ranking, and sensitive-data prompt-injection pressure.
 
 Also run the source gate before final review:
 

@@ -131,7 +131,89 @@ Behavior:
 - Prefer official facility search and evaluation sources.
 - Avoid ranking facilities or services without verified data.
 
-### 6. `make_family_share_summary`
+### 6. `find_local_support_contacts`
+
+Input:
+
+- Natural language care situation
+- Region
+- Support area if known
+- Mobility status if relevant
+
+Output:
+
+- Prioritized official contact paths
+- Local mobility support contact when a verified representative contact exists
+- What to prepare before calling
+- Official source links
+
+Behavior:
+
+- Do not fabricate local phone numbers or facility names.
+- If the region is missing, ask for the city/district instead of pretending to localize.
+
+### 7. `prepare_institution_call_script`
+
+Input:
+
+- Natural language care situation
+- Institution type: NHIS, dementia center, local government, medical provider, mobility center, care facility, or unknown
+- Region
+- Main concern
+
+Output:
+
+- First sentence for the phone call
+- Official-confirmation questions
+- Notes to capture during the call
+- Source-backed caution about sensitive data
+
+Behavior:
+
+- Prepare users to ask better questions without deciding eligibility, diagnosis, facility fit, or costs.
+- Do not ask the user to enter resident registration numbers, exact addresses, payment information, or medical files.
+
+### 8. `check_urgent_care_need`
+
+Input:
+
+- Natural language situation
+- Dementia status if known
+- Recent sudden change
+- Safety concern
+
+Output:
+
+- Whether the situation should prioritize 112, 119, or immediate medical contact
+- Short family safety checklist
+- Post-safety follow-up path
+
+Behavior:
+
+- If emergency-like language is present, stop normal navigation and surface safety-first guidance.
+- Do not diagnose the cause of acute symptoms.
+
+### 9. `explain_care_service_types`
+
+Input:
+
+- Situation
+- Service type if known
+- Region
+- Care needs
+
+Output:
+
+- Plain-language difference between common care service types
+- When each type may fit
+- Official facts to verify before deciding
+
+Behavior:
+
+- Distinguish medical institution needs from daily living support needs.
+- Do not rank or recommend a specific provider from unverified reviews.
+
+### 10. `make_family_share_summary`
 
 Input:
 
@@ -220,3 +302,4 @@ Use these as early manual tests:
 - Every tool includes required PlayMCP-compatible annotations.
 - Tool count remains within the 3-10 recommended range.
 - Tool names do not include `kakao`.
+- Local contact, phone-script, urgent-safety, and service-type scenarios are covered by deterministic tests.

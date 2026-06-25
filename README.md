@@ -4,11 +4,24 @@
 
 It helps families route elderly-care questions across welfare, medical support, mobility, long-term care, dementia support, facilities, and local administration using official-source guidance.
 
+Core scenario tools cover:
+
+- broad family-care situation analysis
+- official support-route routing
+- local support contact discovery
+- long-term-care path explanation
+- dementia care checklist
+- urgent safety triage
+- care/facility option comparison
+- care service type explanation
+- institution call-script preparation
+- optional family-share summaries
+
 ## PlayMCP Fit
 
 - Streamable HTTP transport: `POST /mcp`
 - Stateless server
-- Tool count: 6
+- Tool count: 10
 - No `kakao` string in server or tool names
 - Official-source registry exposed as a resource
 - Dockerfile included for PlayMCP in KC Git source build

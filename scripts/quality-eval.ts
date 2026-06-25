@@ -40,7 +40,7 @@ async function main() {
   const tools = await client.listTools();
   console.log(`mcp_endpoint=${mcpEndpoint}`);
   console.log(`tools=${tools.tools.map(tool => tool.name).join(",")}`);
-  assert(tools.tools.length === 6, `Expected 6 tools, got ${tools.tools.length}`);
+  assert(tools.tools.length === 10, `Expected 10 tools, got ${tools.tools.length}`);
 
   const resources = await client.listResources();
   const officialResource = resources.resources.find(resource => resource.uri === "dolbom-navi://sources/official");
@@ -131,6 +131,50 @@ async function main() {
       },
       mustInclude: [/\[연락처 생략\]/, /\[민감번호 생략\]/, /공식 기관과 의료진/],
       mustNotInclude: [/010-1234-5678/, /440101-1234567/, /02-123-4567/]
+    },
+    {
+      name: "local contacts include verified mobility contact",
+      tool: "find_local_support_contacts",
+      arguments: {
+        situation: "서울 관악구에서 아버지 병원 이동 지원을 알아봐줘",
+        region: "서울 관악구",
+        supportArea: "mobility"
+      },
+      mustInclude: [/지역 문의처 찾기/, /서울시설공단 장애인콜택시/, /1588-4388/, /공식 출처/],
+      mustNotInclude: [/\bunknown\b/i]
+    },
+    {
+      name: "call script keeps official confirmation boundary",
+      tool: "prepare_institution_call_script",
+      arguments: {
+        situation: "장기요양등급 신청 전화를 준비해줘",
+        region: "성남시 분당구",
+        institutionType: "nhis",
+        mainConcern: "장기요양인정 신청 절차"
+      },
+      mustInclude: [/기관 전화 준비/, /국민건강보험공단/, /전화 첫 문장/, /주민등록번호/, /공식 출처/],
+      mustNotInclude: [/\bunknown\b/i]
+    },
+    {
+      name: "urgent checker prioritizes emergency services",
+      tool: "check_urgent_care_need",
+      arguments: {
+        situation: "할아버지가 낙상 후 의식이 흐리고 호흡이 이상해요",
+        recentChange: "갑작스러운 낙상과 의식 변화"
+      },
+      mustInclude: [/긴급도 확인/, /119/, /안전 확인/, /응급의료포털/],
+      mustNotInclude: [/\bunknown\b/i]
+    },
+    {
+      name: "service type explainer covers common care options",
+      tool: "explain_care_service_types",
+      arguments: {
+        serviceType: "unknown",
+        region: "서울 관악구",
+        careNeeds: "야간 대응과 병원 이동"
+      },
+      mustInclude: [/요양원/, /요양병원/, /주야간보호/, /교통약자 이동지원/, /공식 확인/],
+      mustNotInclude: [/\bunknown\b/i]
     }
   ];
 

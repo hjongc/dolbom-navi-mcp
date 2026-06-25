@@ -3,8 +3,12 @@ import assert from "node:assert/strict";
 import {
   analyzeFamilyCareSituation,
   buildDementiaCareChecklist,
+  checkUrgentCareNeed,
   compareCareOrSupportOptions,
+  explainCareServiceTypes,
   makeFamilyShareSummary,
+  findLocalSupportContacts,
+  prepareInstitutionCallScript,
   routeSupportOptions
 } from "./domain.js";
 import { mobilityContactsFor, renderSources } from "./sources.js";
@@ -204,6 +208,63 @@ test("family share summary is concise and does not request sensitive identifiers
   assert.doesNotMatch(output, /02-123-4567/);
   assert.match(output, /\[연락처 생략\]/);
   assert.match(output, /\[민감번호 생략\]/);
+});
+
+test("local support contact tool gives region-aware official contact paths", () => {
+  const output = findLocalSupportContacts({
+    situation: "서울 관악구에서 아버지 병원 이동 지원을 알아봐야 해요",
+    region: "서울 관악구",
+    supportArea: "mobility"
+  });
+
+  assert.match(output, /지역 문의처 찾기/);
+  assert.match(output, /서울시설공단 장애인콜택시/);
+  assert.match(output, /1588-4388/);
+  assert.match(output, /gov\.kr/);
+  assert.match(output, /공식 출처/);
+});
+
+test("institution call script prepares official-confirmation questions without sensitive data collection", () => {
+  const output = prepareInstitutionCallScript({
+    situation: "장기요양등급 신청 전화를 해야 해요",
+    region: "성남시 분당구",
+    institutionType: "nhis",
+    mainConcern: "장기요양인정 신청 절차"
+  });
+
+  assert.match(output, /기관 전화 준비/);
+  assert.match(output, /국민건강보험공단/);
+  assert.match(output, /전화 첫 문장/);
+  assert.match(output, /장기요양인정 신청/);
+  assert.match(output, /주민등록번호/);
+  assert.match(output, /공식 출처/);
+});
+
+test("urgent care checker separates emergency safety path from normal care navigation", () => {
+  const output = checkUrgentCareNeed({
+    situation: "할아버지가 낙상 후 의식이 흐리고 호흡이 이상해요",
+    recentChange: "갑작스러운 낙상과 의식 변화"
+  });
+
+  assert.match(output, /긴급도 확인/);
+  assert.match(output, /119/);
+  assert.match(output, /안전 확인/);
+  assert.match(output, /응급의료포털/);
+});
+
+test("care service type explainer distinguishes facility and support options", () => {
+  const output = explainCareServiceTypes({
+    serviceType: "unknown",
+    region: "서울 관악구",
+    careNeeds: "야간 대응과 병원 이동"
+  });
+
+  assert.match(output, /돌봄 서비스 유형 설명/);
+  assert.match(output, /요양원/);
+  assert.match(output, /요양병원/);
+  assert.match(output, /주야간보호/);
+  assert.match(output, /교통약자 이동지원/);
+  assert.match(output, /공식 확인/);
 });
 
 test("source unavailable state fails clearly", () => {

@@ -19,7 +19,7 @@ This repository was shaped by the official contest and PlayMCP guide documents s
 | Remote MCP server only | `src/server.ts` exposes `POST /mcp` over HTTP. |
 | Streamable HTTP only | Server uses `StreamableHTTPServerTransport`. |
 | Stateless recommended | `sessionIdGenerator: undefined`; no database or server-side session state. |
-| 3-10 tools recommended | Server exposes 6 tools. |
+| 3-10 tools recommended | Server exposes 10 tools. |
 | Tool names use only allowed characters | Smoke test enforces `^[A-Za-z0-9_-]{1,128}$`. |
 | No `kakao` in server/tool names | Server name is `dolbom-navi`; smoke test rejects forbidden tool names. |
 | Required tool annotations | Every tool sets `title`, `readOnlyHint`, `destructiveHint`, `openWorldHint`, and `idempotentHint`. |
@@ -47,11 +47,10 @@ Primary sources include:
 
 ## Current External Status
 
-PlayMCP in KC endpoint issuance is complete.
+The repository now exposes the 10-tool build locally. Before public/final submission, the PlayMCP in KC endpoint must be redeployed from the latest commit and rechecked with:
 
-- Server ID: `618`
-- Status: `Active`
-- Endpoint: `https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp`
-- Remote MCP smoke and full remote tool/resource checks passed.
+- `MCP_ENDPOINT=<new endpoint> npm run smoke`
+- `MCP_ENDPOINT=<new endpoint> npm run quality:eval`
+- `OPENROUTER_API_KEY=... MCP_ENDPOINT=<new endpoint> npm run llm:eval`
 
-Remaining external steps are PlayMCP developer-console registration, temporary/private testing in PlayMCP, review request, public visibility after approval, and AGENTIC PLAYER 10 preliminary submission.
+Remaining external steps are latest-code PlayMCP in KC redeploy, developer-console temporary/private testing, review request, public visibility after approval, and AGENTIC PLAYER 10 preliminary submission.
