@@ -42,6 +42,25 @@ async function main() {
   console.log(`tools=${tools.tools.map(tool => tool.name).join(",")}`);
   assert(tools.tools.length === 6, `Expected 6 tools, got ${tools.tools.length}`);
 
+  const resources = await client.listResources();
+  const officialResource = resources.resources.find(resource => resource.uri === "dolbom-navi://sources/official");
+  assert(officialResource, "Official source registry resource must be listed");
+  assert(hasKorean(officialResource.title), "Official source registry resource title must be Korean");
+  assert(hasKorean(officialResource.description), "Official source registry resource description must be Korean");
+
+  const registry = await client.readResource({ uri: "dolbom-navi://sources/official" });
+  const registryContent = registry.contents?.[0];
+  const registryText = registryContent && "text" in registryContent ? registryContent.text : undefined;
+  assert(typeof registryText === "string", "Official source registry resource must return text");
+  const sourceRecords = JSON.parse(registryText) as Array<{ sourceName?: string; url?: string; confidence?: string }>;
+  assert(sourceRecords.length >= 10, "Official source registry must include national, local, and public-agency sources");
+  for (const expected of ["국민건강보험공단", "정부24", "복지로", "보건복지부", "중앙치매센터", "119", "경찰청 112"]) {
+    assert(sourceRecords.some(source => source.sourceName?.includes(expected)), `Official source registry missing ${expected}`);
+  }
+  assert(sourceRecords.every(source => source.url?.startsWith("http")), "Official source registry source URLs must be absolute HTTP(S) URLs");
+  assert(sourceRecords.every(source => source.confidence), "Official source registry sources must include confidence labels");
+  console.log(`resources=${resources.resources.map(resource => resource.uri).join(",")}`);
+
   for (const tool of tools.tools) {
     assert(hasKorean(tool.title), `${tool.name} title must be Korean`);
     assert(hasKorean(tool.description), `${tool.name} description must be Korean`);

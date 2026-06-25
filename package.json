@@ -11,6 +11,7 @@
     "test": "npm run build && node --test dist/**/*.test.js",
     "smoke": "tsx scripts/smoke.ts",
     "quality:eval": "tsx scripts/quality-eval.ts",
+    "source:check": "tsx scripts/check-sources.ts",
     "llm:eval": "tsx scripts/llm-eval.ts",
     "validate:playmcp": "tsx scripts/validate-playmcp.ts",
     "verify": "npm run build && npm test && npm run validate:playmcp",

@@ -80,6 +80,10 @@ Reason: the contest page says PlayMCP server review can take up to 7 business da
   - `MCP_ENDPOINT=http://127.0.0.1:3912/mcp npm run smoke`: passed; now also checks Korean tool titles and Korean input schema descriptions.
   - `MCP_ENDPOINT=http://127.0.0.1:3912/mcp npm run quality:eval`: passed deterministic MCP quality scenarios.
   - `OPENROUTER_API_KEY=... MCP_ENDPOINT=http://127.0.0.1:3912/mcp npm run llm:eval`: passed 6/6 local LLM-connected scenarios.
+- Latest source/data gate:
+  - `npm run source:check`: passed.
+  - Verified official source and mobility-contact URL reachability for all registered source URLs.
+  - Confirmed 16 regional mobility contact records include phone numbers.
 - `npm run validate:playmcp`: passed; checks required deploy files, pinned SDK, Dockerfile command, CI smoke/Docker build, and official source registry coverage.
 - MCP Inspector CLI: passed for `tools/list`, `resources/list`, and `resources/read`; Inspector scripts now use repo-local `.npm-cache`.
 - `MCP_ALLOWED_HOSTS=127.0.0.1,localhost npm start`: passed without the SDK DNS rebinding warning; invalid `Host: evil.example` returns `403`.

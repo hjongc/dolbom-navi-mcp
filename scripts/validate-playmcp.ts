@@ -33,6 +33,7 @@ assert(packageJson.scripts?.build, "build script is required");
 assert(packageJson.scripts?.test, "test script is required");
 assert(packageJson.scripts?.smoke, "smoke script is required");
 assert(packageJson.scripts?.["quality:eval"], "quality:eval script is required");
+assert(packageJson.scripts?.["source:check"], "source:check script is required");
 assert(packageJson.scripts?.inspect?.includes("--cache .npm-cache"), "inspector scripts must use repo-local npm cache");
 assert(packageJson.scripts?.["inspect:tools"]?.includes("--cache .npm-cache"), "inspect:tools must use repo-local npm cache");
 assert(packageJson.scripts?.["inspect:resources"]?.includes("--cache .npm-cache"), "inspect:resources must use repo-local npm cache");
@@ -55,6 +56,12 @@ const qualityEval = readFileSync("scripts/quality-eval.ts", "utf8");
 assert(/make_family_share_summary/.test(qualityEval), "quality eval must cover family-share output");
 assert(/build_dementia_care_checklist/.test(qualityEval), "quality eval must cover dementia safety output");
 assert(/compare_care_or_support_options/.test(qualityEval), "quality eval must cover facility comparison output");
+assert(/dolbom-navi:\/\/sources\/official/.test(qualityEval), "quality eval must cover official source registry resource");
+
+const sourceCheck = readFileSync("scripts/check-sources.ts", "utf8");
+assert(/SOURCE_CHECK_TIMEOUT_MS/.test(sourceCheck), "source check must support a timeout override");
+assert(/MOBILITY_CONTACTS/.test(sourceCheck), "source check must cover mobility contacts");
+assert(/SOURCES/.test(sourceCheck), "source check must cover official sources");
 
 const ci = readFileSync(".github/workflows/ci.yml", "utf8");
 assert(/docker build --platform linux\/amd64/.test(ci), "CI must verify linux/amd64 Docker build");

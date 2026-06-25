@@ -116,6 +116,19 @@
   - Result: failed at `analyze_family_care_situation title must be Korean`.
   - Interpretation: v2 is functionally reachable, but not yet on the latest metadata/product-quality build.
 
+### Official Source URL Gate
+
+- Added a manual source reachability gate:
+  - `npm run source:check`
+  - Checks all official source URLs and mobility contact URLs.
+  - Verifies source/contact `reviewedAt` metadata and required phone numbers for mobility contacts.
+  - Uses HTTP 2xx/3xx as reachability evidence because several official/public sites use security redirects or block direct `HEAD`.
+  - Falls back to `curl` when Node `fetch` is blocked by public-site HTTP/TLS behavior.
+- Current source check passed:
+  - National/public sources checked: 국민건강보험공단 노인장기요양보험, 정부24, 복지로, 보건복지부, 응급의료포털 E-Gen, 중앙치매센터, 중앙치매센터 치매상담콜센터, 119, 경찰청 112.
+  - Mobility contacts checked for Seoul, Busan, Incheon, Gyeonggi, Daegu, Daejeon, Gwangju, Ulsan, Sejong, Gangwon, Chungnam, Jeonbuk, Jeonnam, Gyeongbuk, Gyeongnam, and Jeju.
+  - Notable behavior: 경찰청 112 returns `307` security redirects; 강원 광역이동지원센터 required the `curl` fallback and returned `200`.
+
 ### LLM-Connected Evaluation
 
 - Added a repeatable OpenRouter eval command:
