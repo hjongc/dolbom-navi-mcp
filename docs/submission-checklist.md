@@ -105,3 +105,7 @@ Reason: the contest page says PlayMCP server review can take up to 7 business da
     - Failure: `analyze_family_care_situation title must be Korean`.
     - Required before official registration: redeploy/recreate the KC endpoint from latest `main`, then pass remote `smoke`, `quality:eval`, and `llm:eval`.
   - PlayMCP developer-console temporary registration still shows `Offline`; update the registration to the new `dolbom-navi-v2` endpoint or recreate the temporary registration before requesting final review.
+- Latest official-registration blocker:
+  - GitHub `main` is now ahead of the deployed KC v2 endpoint.
+  - The stale v2 endpoint still fails remote metadata quality gates.
+  - Follow `docs/playmcp-redeploy-runbook.md` before requesting final review.

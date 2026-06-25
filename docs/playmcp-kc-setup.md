@@ -91,12 +91,15 @@ docker build --platform linux/amd64 -t <image>:<tag> .
 
 ## Next Work
 
-1. Register the issued Endpoint URL in the PlayMCP developer console.
-2. Save it as a temporary/private registration first.
-3. Run PlayMCP temporary-registration tests and, optionally, Inspector browser UI.
-4. Request final PlayMCP review.
-5. After approval, change visibility from `나에게만 공개` to `전체 공개`.
-6. Submit through the AGENTIC PLAYER 10 preliminary participation form.
+1. Replace the stale KC endpoint with a latest-code endpoint.
+   - Use `docs/playmcp-redeploy-runbook.md`.
+2. Run remote `smoke`, `quality:eval`, and expanded `llm:eval` against the replacement endpoint.
+3. Register the verified Endpoint URL in the PlayMCP developer console.
+4. Save it as a temporary/private registration first.
+5. Run PlayMCP temporary-registration tests and, optionally, Inspector browser UI.
+6. Request final PlayMCP review.
+7. After approval, change visibility from `나에게만 공개` to `전체 공개`.
+8. Submit through the AGENTIC PLAYER 10 preliminary participation form.
 
 ## PlayMCP Server Development Requirements
 
