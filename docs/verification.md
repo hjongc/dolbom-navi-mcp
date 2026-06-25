@@ -183,3 +183,22 @@
   - Routing and final-answer quality mostly pass, but tool outputs still leak old surface issues from the deployed version.
   - Observed remote issues include `현재 상태: suspected`, `지역: unknown`, and mobility prompts showing `의료·진료 지원` before `이동·교통·병원동행`.
   - Local code fixes these issues and passes the expanded 6-scenario LLM eval; redeploy is required to close the gap.
+
+### Latest Remote V2 Re-Check
+
+- Latest pushed commit: `90ccc14715f43c4a75f04f78ab361e248fdb022a`.
+- GitHub Actions CI on `main` passed for this commit.
+- Re-check against the deployed v2 endpoint still proves it is stale:
+  - `MCP_ENDPOINT=https://dolbom-navi-v2.playmcp-endpoint.kakaocloud.io/mcp npm run smoke`
+  - Result: failed after MCP negotiation because `analyze_family_care_situation` title is not Korean.
+  - `MCP_ENDPOINT=https://dolbom-navi-v2.playmcp-endpoint.kakaocloud.io/mcp npm run quality:eval`
+  - Result: failed because the official source registry resource title is not Korean.
+- Edge/KC Hub detail page for server ID `627` shows:
+  - Status: `Active`
+  - Endpoint: `https://dolbom-navi-v2.playmcp-endpoint.kakaocloud.io/mcp`
+  - Visible management buttons: `중지`, `삭제`
+  - No visible non-destructive rebuild/redeploy button on the detail screen.
+- Current interpretation:
+  - v2 is reachable but is not running the latest `main` build.
+  - Official registration should not proceed with this endpoint until a latest-code KC endpoint passes remote `smoke`, `quality:eval`, and expanded `llm:eval`.
+  - If PlayMCP in KC still has no rebuild action, the practical path is to delete/recreate the stale KC server or create a replacement endpoint from `main`, then register that endpoint in the PlayMCP developer console.
