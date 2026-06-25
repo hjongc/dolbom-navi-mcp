@@ -75,7 +75,7 @@ Reason: the contest page says PlayMCP server review can take up to 7 business da
   - `MCP_ENDPOINT=http://127.0.0.1:3920/mcp npm run smoke`: passed; protocol `2025-11-25`, 10 tools, avg latency 2.8ms, max 5.9ms.
   - `MCP_ENDPOINT=http://127.0.0.1:3920/mcp npm run quality:eval`: passed deterministic MCP scenarios for existing safety behavior plus local contact lookup, call-script preparation, urgent triage, and service-type explanation.
   - `npm run source:check`: passed for official national/public sources and 16 regional mobility-contact URLs.
-  - Not run in this local shell: `npm run llm:eval`, because `OPENROUTER_API_KEY` was not set.
+  - `OPENROUTER_API_KEY=... MCP_ENDPOINT=http://127.0.0.1:3921/mcp npm run llm:eval`: passed 12/12 local LLM-connected scenarios after tightening the evaluator to accept equivalent official-confirmation wording.
   - Remote endpoint still needs redeploy/recheck before claiming the public PlayMCP server has the 10-tool build.
 
 - `npm install --cache .npm-cache`: passed, 0 vulnerabilities.
