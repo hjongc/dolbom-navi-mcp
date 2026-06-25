@@ -4,7 +4,8 @@ import {
   analyzeFamilyCareSituation,
   buildDementiaCareChecklist,
   compareCareOrSupportOptions,
-  makeFamilyShareSummary
+  makeFamilyShareSummary,
+  routeSupportOptions
 } from "./domain.js";
 import { mobilityContactsFor, renderSources } from "./sources.js";
 
@@ -33,6 +34,23 @@ test("dementia checklist refuses diagnosis framing and includes official sources
 
   assert.match(output, /진단하지 않습니다/);
   assert.match(output, /중앙치매센터/);
+});
+
+test("enum state labels are rendered in Korean for users", () => {
+  const analysis = analyzeFamilyCareSituation({
+    situation: "할머니 치매 의심과 장기요양, 어디부터 시작하죠",
+    dementiaStatus: "suspected",
+    longTermCareGradeStatus: "unknown"
+  });
+  const checklist = buildDementiaCareChecklist({
+    dementiaStatus: "suspected",
+    situation: "할머니가 기억력이 떨어졌어요"
+  });
+
+  assert.match(analysis, /장기요양등급: 미확인/);
+  assert.doesNotMatch(analysis, /장기요양등급: unknown/);
+  assert.match(checklist, /현재 상태: 의심됨/);
+  assert.doesNotMatch(checklist, /현재 상태: suspected/);
 });
 
 test("missing region asks one concise follow-up question", () => {
@@ -80,6 +98,18 @@ test("mobility route includes verified local mobility contact when region matche
   assert.match(output, /1588-4388/);
 });
 
+test("explicit mobility intent is prioritized over medical keyword matches", () => {
+  const output = routeSupportOptions({
+    situation: "아버지 병원 이동과 동행 지원이 필요해요",
+    mainConcern: "병원 이동 및 동행 지원 문의",
+    supportArea: "mobility",
+    region: "unknown"
+  });
+
+  assert.match(output, /1\. 이동·교통·병원동행/);
+  assert.match(output, /이번 주 우선 할 일: 거주지 시·군·구청, 주민센터, 노인복지관의 교통·동행 지원 사업을 확인하세요\./);
+});
+
 test("mobility contact registry maps province aliases", () => {
   const contacts = mobilityContactsFor("경기도 성남시 분당구");
 
@@ -121,6 +151,34 @@ test("facility comparison uses care needs and family priorities", () => {
   assert.match(output, /가족 우선순위: 야간 대응과 비용 투명성/);
   assert.match(output, /치매와 배회 위험/);
   assert.match(output, /야간 대응과 비용 투명성/);
+});
+
+test("llm placeholder strings are not surfaced as real user facts", () => {
+  const output = compareCareOrSupportOptions({
+    region: "unknown",
+    desiredType: "요양원",
+    careNeeds: "비용, 야간대응",
+    familyPriorities: "unknown"
+  });
+
+  assert.match(output, /지역: 미확인 \/ 희망 유형: 요양원/);
+  assert.match(output, /필요 지원: 비용, 야간대응/);
+  assert.doesNotMatch(output, /unknown/);
+  assert.doesNotMatch(output, /가족 우선순위: unknown/);
+});
+
+test("tool outputs keep a user-facing safety notice for llm summarization", () => {
+  const output = routeSupportOptions({
+    situation: "아버지 병원 이동 지원은 어디에 문의해야 하나요",
+    supportArea: "mobility",
+    region: "unknown"
+  });
+
+  assert.match(output, /확인 필요/);
+  assert.match(output, /의학적 진단/);
+  assert.match(output, /장기요양등급 승인/);
+  assert.match(output, /공식 기관과 의료진 확인이 필요합니다/);
+  assert.doesNotMatch(output, /region: unknown/);
 });
 
 test("family share summary is concise and does not request sensitive identifiers", () => {

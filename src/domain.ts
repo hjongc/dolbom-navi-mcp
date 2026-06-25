@@ -50,11 +50,87 @@ function optionalItem(label: string, value?: string): string | undefined {
   return trimmed ? `${label}: ${trimmed}` : undefined;
 }
 
+function isUnknownPlaceholder(text: string): boolean {
+  const normalized = text.trim().toLowerCase();
+  return [
+    "",
+    "unknown",
+    "undefined",
+    "null",
+    "n/a",
+    "na",
+    "none",
+    "not sure",
+    "unspecified",
+    "미상",
+    "미정",
+    "모름",
+    "모르겠음",
+    "알 수 없음",
+    "확인 필요"
+  ].includes(normalized);
+}
+
 function sanitizeUserText(text: string): string {
   return text
     .replace(/\b\d{6}-?[1-4]\d{6}\b/g, "[민감번호 생략]")
     .replace(/\b01[016789]-?\d{3,4}-?\d{4}\b/g, "[연락처 생략]")
     .replace(/\b0(?:2|[3-6][1-5]|70|80)-?\d{3,4}-?\d{4}\b/g, "[연락처 생략]");
+}
+
+function cleanOptionalText(value: string | undefined, fallback = "미확인"): string {
+  if (!value || isUnknownPlaceholder(value)) return fallback;
+  return sanitizeUserText(value.trim());
+}
+
+function cleanOptionalDetail(value: string | undefined): string {
+  if (!value || isUnknownPlaceholder(value)) return "";
+  return sanitizeUserText(value.trim());
+}
+
+function officialConfirmationNotice(): string {
+  return [
+    "## 확인 필요",
+    "이 안내는 가족이 다음 문의와 준비를 시작하기 위한 정리입니다. 의학적 진단, 장기요양등급 승인, 혜택 대상 여부, 시설 입소 가능 여부, 시설 순위는 확정하지 않으며 공식 기관과 의료진 확인이 필요합니다."
+  ].join("\n");
+}
+
+function renderDementiaStatus(status: Required<CareProfileInput>["dementiaStatus"]): string {
+  return {
+    suspected: "의심됨",
+    diagnosed: "진단받음",
+    unknown: "미확인",
+    severe_symptoms: "즉시 안전 확인 필요"
+  }[status];
+}
+
+function renderLongTermCareGradeStatus(status: Required<CareProfileInput>["longTermCareGradeStatus"]): string {
+  return {
+    none: "없음",
+    applied: "신청 중",
+    has_grade: "등급 있음",
+    unknown: "미확인"
+  }[status];
+}
+
+function preferredAreaFor(profile: Required<CareProfileInput>): SourceCategory | undefined {
+  if (profile.supportArea === "welfare") return "welfare";
+  if (profile.supportArea === "medical") return "medical";
+  if (profile.supportArea === "care") return "long_term_care";
+  if (profile.supportArea === "mobility") return "mobility";
+  if (profile.supportArea === "facility") return "facility";
+  if (profile.supportArea === "administration") return "local_government";
+  if (profile.dementiaStatus !== "unknown") return "dementia";
+  return undefined;
+}
+
+function prioritizeRoutes(routes: RoutedArea[], preferredArea: SourceCategory | undefined): RoutedArea[] {
+  if (!preferredArea) return routes;
+  return [...routes].sort((left, right) => {
+    if (left.area === preferredArea && right.area !== preferredArea) return -1;
+    if (right.area === preferredArea && left.area !== preferredArea) return 1;
+    return 0;
+  });
 }
 
 function familyShareSummary(situation: string, firstAction: string): string {
@@ -89,12 +165,12 @@ function mobilityContactSection(region: string, routes: RoutedArea[]): string {
 function normalizeProfile(input: CareProfileInput): Required<CareProfileInput> {
   return {
     situation: sanitizeUserText(input.situation.trim()),
-    region: sanitizeUserText(input.region?.trim() || "미확인"),
-    ageRange: sanitizeUserText(input.ageRange?.trim() || "미확인"),
+    region: cleanOptionalText(input.region),
+    ageRange: cleanOptionalText(input.ageRange),
     dementiaStatus: input.dementiaStatus || "unknown",
     longTermCareGradeStatus: input.longTermCareGradeStatus || "unknown",
-    mobilityStatus: sanitizeUserText(input.mobilityStatus?.trim() || "미확인"),
-    livingSituation: sanitizeUserText(input.livingSituation?.trim() || "미확인"),
+    mobilityStatus: cleanOptionalText(input.mobilityStatus),
+    livingSituation: cleanOptionalText(input.livingSituation),
     supportArea: input.supportArea || "unknown"
   };
 }
@@ -182,11 +258,12 @@ export function routeAreas(input: CareProfileInput): RoutedArea[] {
   }
 
   const seen = new Set<string>();
-  return routes.filter(route => {
+  const uniqueRoutes = routes.filter(route => {
     if (seen.has(route.area)) return false;
     seen.add(route.area);
     return true;
   });
+  return prioritizeRoutes(uniqueRoutes, preferredAreaFor(profile));
 }
 
 export function analyzeFamilyCareSituation(input: CareProfileInput): string {
@@ -209,7 +286,9 @@ export function analyzeFamilyCareSituation(input: CareProfileInput): string {
       ]),
       "",
       "## 공식 출처",
-      renderSources(sourcesFor(["emergency", "dementia", "long_term_care"]))
+      renderSources(sourcesFor(["emergency", "dementia", "long_term_care"])),
+      "",
+      officialConfirmationNotice()
     ].join("\n");
   }
 
@@ -222,7 +301,7 @@ export function analyzeFamilyCareSituation(input: CareProfileInput): string {
   return [
     "## 상황 요약",
     `입력된 상황: ${profile.situation}`,
-    `거주지: ${profile.region} / 연령대: ${profile.ageRange} / 장기요양등급: ${profile.longTermCareGradeStatus}`,
+    `거주지: ${profile.region} / 연령대: ${profile.ageRange} / 장기요양등급: ${renderLongTermCareGradeStatus(profile.longTermCareGradeStatus)}`,
     "",
     "## 먼저 볼 지원 영역",
     routes.map(route => `- ${route.label}: ${route.reason}`).join("\n"),
@@ -231,6 +310,8 @@ export function analyzeFamilyCareSituation(input: CareProfileInput): string {
     routes.map(route => `- ${route.label}: ${route.firstContact}`).join("\n"),
     "",
     mobilityContactSection(profile.region, routes),
+    "",
+    officialConfirmationNotice(),
     "",
     "## 추가로 확인하면 정확해지는 정보",
     missing.length > 0 ? lineItems(missing) : "- 현재 입력만으로 1차 경로 분류가 가능합니다.",
@@ -262,6 +343,8 @@ export function routeSupportOptions(input: CareProfileInput & { mainConcern?: st
     ]),
     "",
     mobilityContactSection(profile.region, routes),
+    "",
+    officialConfirmationNotice(),
     "",
     familyShareSummary(profile.situation, routes[0]?.firstContact || "거주지와 가장 급한 돌봄 문제를 가족끼리 먼저 정리"),
     "",
@@ -304,7 +387,9 @@ export function explainLongTermCarePath(input: CareProfileInput): string {
     ),
     "",
     "## 공식 출처",
-    renderSources(sourcesFor(["long_term_care", "welfare", "local_government"]))
+    renderSources(sourcesFor(["long_term_care", "welfare", "local_government"])),
+    "",
+    officialConfirmationNotice()
   ].join("\n");
 }
 
@@ -323,13 +408,15 @@ export function buildDementiaCareChecklist(input: { dementiaStatus?: CareProfile
       ]),
       "",
       "## 공식 출처",
-      renderSources(sourcesFor(["emergency", "dementia"]))
+      renderSources(sourcesFor(["emergency", "dementia"])),
+      "",
+      officialConfirmationNotice()
     ].join("\n");
   }
 
   return [
     "## 치매·인지건강 체크리스트",
-    `현재 상태: ${status}`,
+    `현재 상태: ${renderDementiaStatus(status)}`,
     "",
     "## 가족 관찰 메모",
     lineItems([
@@ -356,15 +443,17 @@ export function buildDementiaCareChecklist(input: { dementiaStatus?: CareProfile
     ),
     "",
     "## 공식 출처",
-    renderSources(sourcesFor(["dementia", "medical", "long_term_care"]))
+    renderSources(sourcesFor(["dementia", "medical", "long_term_care"])),
+    "",
+    officialConfirmationNotice()
   ].join("\n");
 }
 
 export function compareCareOrSupportOptions(input: { region?: string; desiredType?: string; careNeeds?: string; familyPriorities?: string }): string {
-  const region = sanitizeUserText(input.region || "미확인");
-  const desiredType = sanitizeUserText(input.desiredType || "미확인");
-  const careNeeds = sanitizeUserText(input.careNeeds?.trim() || "");
-  const familyPriorities = sanitizeUserText(input.familyPriorities?.trim() || "");
+  const region = cleanOptionalText(input.region);
+  const desiredType = cleanOptionalText(input.desiredType);
+  const careNeeds = cleanOptionalDetail(input.careNeeds);
+  const familyPriorities = cleanOptionalDetail(input.familyPriorities);
   const context = [
     optionalItem("필요 지원", careNeeds),
     optionalItem("가족 우선순위", familyPriorities)
@@ -403,6 +492,8 @@ export function compareCareOrSupportOptions(input: { region?: string; desiredTyp
     "",
     "## 주의",
     "이 도구는 특정 기관 순위를 만들지 않습니다. 검증되지 않은 리뷰나 광고 문구를 근거로 추천하지 말고, 공식 정보와 직접 상담 내용을 함께 확인하세요.",
+    "",
+    officialConfirmationNotice(),
     "",
     familyShareSummary(
       `${region}에서 ${desiredType} 비교 필요`,

@@ -68,3 +68,41 @@
 
 - MCP Inspector browser UI review.
   - Inspector CLI passed, but the browser UI can still be used as a final manual sanity check before PlayMCP review.
+
+## 2026-06-25
+
+### LLM-Connected Evaluation
+
+- Added a repeatable OpenRouter eval command:
+  - `OPENROUTER_API_KEY=... MCP_ENDPOINT=<endpoint> npm run llm:eval`
+  - The command sends the live MCP tool list to an LLM, checks tool-call routing, calls the selected MCP tool, then asks the LLM to produce the final user answer from the tool result.
+  - It verifies four quality gates per scenario: official-source language, safety caveat, next action, and no literal `unknown` leakage.
+- First OpenRouter run against the deployed endpoint found:
+  - All 3 registration-style prompts routed to appropriate tools.
+  - Final LLM answers sometimes weakened the "not diagnosis / not grade approval / not facility ranking" caveat.
+  - LLM-provided optional fields could include the literal string `unknown`, which appeared in facility-comparison output.
+- Local fix and regression coverage:
+  - Optional placeholder strings such as `unknown`, `undefined`, `n/a`, `미상`, and `모름` are now normalized to missing values before rendering.
+  - Internal enum values such as `unknown` and `suspected` are rendered as Korean user-facing labels such as `미확인`, `없음`, and `의심됨`.
+  - Tool outputs now include a clear user-facing "확인 필요" section so LLM summarization is more likely to retain official-confirmation boundaries.
+  - Explicit support-area intent now takes priority in route ordering, so a mobility-focused prompt with medical keywords returns `이동·교통·병원동행` before `의료·진료 지원`.
+  - Added tests for placeholder leakage, Korean enum labels, explicit mobility-priority routing, and final-answer safety notices.
+- Local LLM eval after the fix passed with `MCP_ENDPOINT=http://127.0.0.1:3000/mcp` using OpenRouter model `openai/gpt-4.1-mini`.
+  - Prompt 1: `할머니 치매 의심과 장기요양, 어디부터 시작하죠`
+    - Routed to an appropriate care/dementia tool.
+    - Final answer retained official-confirmation caveat and no `unknown` leakage.
+  - Prompt 2: `아버지 병원 이동·동행 지원은 어디에 문의하나요`
+    - Routed to `route_support_options`.
+    - Final answer retained official-confirmation caveat and no `unknown` leakage.
+  - Prompt 3: `요양원 비용·야간대응 상담 질문을 정리해줘`
+    - Routed to `compare_care_or_support_options`.
+    - Final answer retained official-confirmation caveat and no `unknown` leakage.
+  - Expanded LLM eval then passed 6 scenarios including emergency wandering, family-chat long-term-care summary, and Seoul Gwanak-gu mobility support with `1588-4388`.
+
+### Deployment Boundary
+
+- The deployed PlayMCP endpoint still needs to be updated with these local improvements before claiming remote LLM-connected quality has improved.
+- Remote expanded LLM eval against `https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp` still fails before redeploy.
+  - Routing and final-answer quality mostly pass, but tool outputs still leak old surface issues from the deployed version.
+  - Observed remote issues include `현재 상태: suspected`, `지역: unknown`, and mobility prompts showing `의료·진료 지원` before `이동·교통·병원동행`.
+  - Local code fixes these issues and passes the expanded 6-scenario LLM eval; redeploy is required to close the gap.

@@ -10,6 +10,7 @@
     "start": "node dist/src/server.js",
     "test": "npm run build && node --test dist/**/*.test.js",
     "smoke": "tsx scripts/smoke.ts",
+    "llm:eval": "tsx scripts/llm-eval.ts",
     "validate:playmcp": "tsx scripts/validate-playmcp.ts",
     "verify": "npm run build && npm test && npm run validate:playmcp",
     "inspect": "npx --cache .npm-cache @modelcontextprotocol/inspector http://127.0.0.1:${PORT:-3000}/mcp",
