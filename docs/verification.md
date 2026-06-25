@@ -73,14 +73,28 @@
 
 ### Current Remote Status
 
-- Latest local code is ahead of the last verified PlayMCP in KC deployment.
 - Current production-readiness boundary:
-  - Local build, unit tests, PlayMCP manifest validation, local MCP smoke, and local LLM-connected eval pass.
-  - A newly deployed or refreshed KC endpoint still needs to pass remote MCP smoke and remote LLM-connected eval before final review.
+  - Local build, unit tests, PlayMCP manifest validation, local MCP smoke, local LLM-connected eval, new KC remote smoke, and new KC remote LLM-connected eval pass.
+  - PlayMCP developer-console temporary registration still needs to be updated from the previous offline endpoint to the new `dolbom-navi-v2` endpoint before final review.
 - Re-check against the previous endpoint failed:
   - `MCP_ENDPOINT=https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp npm run smoke`
   - Result: failed before MCP negotiation with `fetch failed` / `redirect count exceeded`.
 - Do not claim the previous endpoint is production-ready until the live endpoint is redeployed and re-verified.
+- New PlayMCP in KC deployment from GitHub `main` succeeded:
+  - Server: `dolbom-navi-v2`
+  - ID: `627`
+  - Build job: `mcp-build-apply-627`
+  - Endpoint: `https://dolbom-navi-v2.playmcp-endpoint.kakaocloud.io/mcp`
+  - Status: `Active`
+- Remote smoke against the new endpoint passed:
+  - `MCP_ENDPOINT=https://dolbom-navi-v2.playmcp-endpoint.kakaocloud.io/mcp npm run smoke`
+  - Protocol: `2025-11-25`
+  - Tools: 6
+  - Latency: avg 22.1ms, max 32.7ms
+- Remote LLM-connected eval against the new endpoint passed:
+  - `OPENROUTER_API_KEY=... MCP_ENDPOINT=https://dolbom-navi-v2.playmcp-endpoint.kakaocloud.io/mcp npm run llm:eval`
+  - Model: `openai/gpt-4.1-mini`
+  - Result: 6/6 scenarios passed routing and quality checks.
 
 ### LLM-Connected Evaluation
 
