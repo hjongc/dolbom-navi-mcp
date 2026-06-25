@@ -75,6 +75,11 @@ Reason: the contest page says PlayMCP server review can take up to 7 business da
 - Source confidence badges, family-share summaries, and sensitive number redaction: covered by domain tests.
 - `MCP_ENDPOINT=http://127.0.0.1:3911/mcp npm run smoke`: passed against the latest local Streamable HTTP endpoint; checked MCP protocol `2025-11-25`, 6 tools, Korean tool descriptions, required annotations, allowed tool-name characters, no forbidden server/tool naming, and repeated call latency under 3 seconds. Latest local repeated-call latency: avg 6.9ms, max 17.4ms.
 - `OPENROUTER_API_KEY=... MCP_ENDPOINT=http://127.0.0.1:3911/mcp npm run llm:eval`: passed 6/6 local LLM-connected scenarios using `openai/gpt-4.1-mini`.
+- Latest metadata/product-quality pass after commit `5064076`:
+  - `npm run verify`: passed, 17 tests.
+  - `MCP_ENDPOINT=http://127.0.0.1:3912/mcp npm run smoke`: passed; now also checks Korean tool titles and Korean input schema descriptions.
+  - `MCP_ENDPOINT=http://127.0.0.1:3912/mcp npm run quality:eval`: passed deterministic MCP quality scenarios.
+  - `OPENROUTER_API_KEY=... MCP_ENDPOINT=http://127.0.0.1:3912/mcp npm run llm:eval`: passed 6/6 local LLM-connected scenarios.
 - `npm run validate:playmcp`: passed; checks required deploy files, pinned SDK, Dockerfile command, CI smoke/Docker build, and official source registry coverage.
 - MCP Inspector CLI: passed for `tools/list`, `resources/list`, and `resources/read`; Inspector scripts now use repo-local `.npm-cache`.
 - `MCP_ALLOWED_HOSTS=127.0.0.1,localhost npm start`: passed without the SDK DNS rebinding warning; invalid `Host: evil.example` returns `403`.
@@ -87,4 +92,7 @@ Reason: the contest page says PlayMCP server review can take up to 7 business da
   - New PlayMCP in KC endpoint `https://dolbom-navi-v2.playmcp-endpoint.kakaocloud.io/mcp`: Active.
   - `MCP_ENDPOINT=https://dolbom-navi-v2.playmcp-endpoint.kakaocloud.io/mcp npm run smoke`: passed; protocol `2025-11-25`, 6 tools, avg latency 22.1ms, max 32.7ms.
   - `OPENROUTER_API_KEY=... MCP_ENDPOINT=https://dolbom-navi-v2.playmcp-endpoint.kakaocloud.io/mcp npm run llm:eval`: passed 6/6 remote LLM-connected scenarios.
+  - New stricter `quality:eval` currently fails on deployed v2 because KC has not been redeployed after commit `5064076`.
+    - Failure: `analyze_family_care_situation title must be Korean`.
+    - Required before official registration: redeploy/recreate the KC endpoint from latest `main`, then pass remote `smoke`, `quality:eval`, and `llm:eval`.
   - PlayMCP developer-console temporary registration still shows `Offline`; update the registration to the new `dolbom-navi-v2` endpoint or recreate the temporary registration before requesting final review.

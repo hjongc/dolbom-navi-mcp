@@ -96,6 +96,26 @@
   - Model: `openai/gpt-4.1-mini`
   - Result: 6/6 scenarios passed routing and quality checks.
 
+### Metadata And Product-Quality Gate
+
+- Added a deterministic MCP quality eval:
+  - `MCP_ENDPOINT=<endpoint> npm run quality:eval`
+  - Checks tool titles, tool descriptions, input schema descriptions, representative tool outputs, emergency handling, mobility priority, facility-ranking avoidance, sensitive identifier redaction, and placeholder leakage.
+- Improved local MCP metadata quality:
+  - Tool titles are now Korean.
+  - Input schema descriptions are now Korean and user-facing.
+  - Official-source resource title and description are Korean.
+  - General family-care analysis no longer repeats the same caveat in both `확인 필요` and `주의` sections.
+- Local latest-code checks passed:
+  - `npm run verify`
+  - `MCP_ENDPOINT=http://127.0.0.1:3912/mcp npm run smoke`
+  - `MCP_ENDPOINT=http://127.0.0.1:3912/mcp npm run quality:eval`
+  - `OPENROUTER_API_KEY=... MCP_ENDPOINT=http://127.0.0.1:3912/mcp npm run llm:eval`
+- Current deployed `dolbom-navi-v2` endpoint still needs redeploy after commit `5064076`.
+  - `MCP_ENDPOINT=https://dolbom-navi-v2.playmcp-endpoint.kakaocloud.io/mcp npm run quality:eval`
+  - Result: failed at `analyze_family_care_situation title must be Korean`.
+  - Interpretation: v2 is functionally reachable, but not yet on the latest metadata/product-quality build.
+
 ### LLM-Connected Evaluation
 
 - Added a repeatable OpenRouter eval command:
