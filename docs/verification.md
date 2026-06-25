@@ -60,6 +60,9 @@
   - Confirmed PlayMCP detail page lists all 6 tools with Korean user-facing descriptions.
   - `MCP_ENDPOINT=https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp npm run smoke`: passed.
   - Remote smoke latency: avg 24.0ms, max 31.3ms.
+  - Full remote MCP check passed for all 6 tools:
+    `analyze_family_care_situation`, `route_support_options`, `explain_long_term_care_path`, `build_dementia_care_checklist`, `compare_care_or_support_options`, and `make_family_share_summary`.
+  - Full remote check confirmed every tool description is Korean, every tool call returned successfully, and `dolbom-navi://sources/official` can be listed and read.
 
 ### Not Verified Yet
 
