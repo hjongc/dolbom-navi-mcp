@@ -96,16 +96,11 @@ Reason: the contest page says PlayMCP server review can take up to 7 business da
 - `docker build --platform linux/amd64 -t dolbom-navi-mcp:local .`: passed.
 - Container smoke test on `http://127.0.0.1:3100/mcp`: passed; latest repeated-call latency avg 8.9ms, max 14.9ms.
 - Historical PlayMCP in KC Git-source deployment from GitHub `main` commit `0f793c8`: passed on 2026-06-24.
-- Current remote status on 2026-06-25: new KC endpoint is live and MCP/LLM verified.
-  - Previous PlayMCP endpoint `https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp` failed the latest smoke re-check with `fetch failed` / `redirect count exceeded`.
-  - New PlayMCP in KC endpoint `https://dolbom-navi-v2.playmcp-endpoint.kakaocloud.io/mcp`: Active.
-  - `MCP_ENDPOINT=https://dolbom-navi-v2.playmcp-endpoint.kakaocloud.io/mcp npm run smoke`: passed; protocol `2025-11-25`, 6 tools, avg latency 22.1ms, max 32.7ms.
-  - `OPENROUTER_API_KEY=... MCP_ENDPOINT=https://dolbom-navi-v2.playmcp-endpoint.kakaocloud.io/mcp npm run llm:eval`: passed 6/6 remote LLM-connected scenarios.
-  - New stricter `quality:eval` currently fails on deployed v2 because KC has not been redeployed after commit `5064076`.
-    - Failure: `analyze_family_care_situation title must be Korean`.
-    - Required before official registration: redeploy/recreate the KC endpoint from latest `main`, then pass remote `smoke`, `quality:eval`, and `llm:eval`.
-  - PlayMCP developer-console temporary registration still shows `Offline`; update the registration to the new `dolbom-navi-v2` endpoint or recreate the temporary registration before requesting final review.
-- Latest official-registration blocker:
-  - GitHub `main` is now ahead of the deployed KC v2 endpoint.
-  - The stale v2 endpoint still fails remote metadata quality gates.
-  - Follow `docs/playmcp-redeploy-runbook.md` before requesting final review.
+- Current remote status on 2026-06-25: latest KC endpoint is live and verified.
+  - Fresh PlayMCP in KC endpoint `https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp`: Active.
+  - Server ID: `631`; build job: `mcp-build-apply-631`.
+  - `MCP_ENDPOINT=https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp npm run smoke`: passed; protocol `2025-11-25`, 6 tools, avg latency 24.7ms, max 53.7ms.
+  - `MCP_ENDPOINT=https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp npm run quality:eval`: passed deterministic MCP quality scenarios.
+  - `OPENROUTER_API_KEY=... MCP_ENDPOINT=https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp npm run llm:eval`: passed 10/10 remote LLM-connected scenarios.
+  - `npm run source:check`: passed after remote endpoint verification.
+  - Remaining before official review: update or recreate the PlayMCP developer-console temporary registration so it points to the verified `dolbom-navi` endpoint, then run temporary/private console testing.

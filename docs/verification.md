@@ -176,15 +176,38 @@
     - Final answer retained official-confirmation caveat and no `unknown` leakage.
   - Expanded LLM eval then passed 6 scenarios including emergency wandering, family-chat long-term-care summary, and Seoul Gwanak-gu mobility support with `1588-4388`.
 
-### Deployment Boundary
+### Latest Verified KC Endpoint
 
-- The deployed PlayMCP endpoint still needs to be updated with these local improvements before claiming remote LLM-connected quality has improved.
-- Remote expanded LLM eval against `https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp` still fails before redeploy.
-  - Routing and final-answer quality mostly pass, but tool outputs still leak old surface issues from the deployed version.
-  - Observed remote issues include `현재 상태: suspected`, `지역: unknown`, and mobility prompts showing `의료·진료 지원` before `이동·교통·병원동행`.
-  - Local code fixes these issues and passes the expanded 6-scenario LLM eval; redeploy is required to close the gap.
+- User deleted/replaced the stale KC deployment and created a fresh Git source build server:
+  - Server: `dolbom-navi`
+  - ID: `631`
+  - Build job: `mcp-build-apply-631`
+  - Endpoint: `https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp`
+  - Status: `Active`
+- Remote smoke against the fresh endpoint passed:
+  - `MCP_ENDPOINT=https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp npm run smoke`
+  - Protocol: `2025-11-25`
+  - Tools: 6
+  - Latency: avg 24.7ms, max 53.7ms
+- Remote deterministic quality eval passed:
+  - `MCP_ENDPOINT=https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp npm run quality:eval`
+  - Passed Korean enum labels and long-term-care caveat.
+  - Passed mobility route priority and Seoul local contact.
+  - Passed emergency wandering safety routing.
+  - Passed facility comparison avoiding ranking.
+  - Passed family summary sensitive-identifier redaction.
+- Remote OpenRouter LLM-connected eval passed:
+  - `OPENROUTER_API_KEY=... MCP_ENDPOINT=https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp npm run llm:eval`
+  - Model: `openai/gpt-4.1-mini`
+  - Result: 10/10 scenarios passed.
+  - Covered normal routing plus diagnosis overclaim, long-term-care approval guarantee, facility-ranking pressure, and sensitive-data prompt-injection pressure.
+- Source reachability gate passed after the remote endpoint verification:
+  - `npm run source:check`
+  - National/public sources and 16 regional mobility contacts passed.
+- Current remaining external step:
+  - PlayMCP developer-console temporary registration still needs to point to this verified endpoint and pass temporary/private console testing before final review request.
 
-### Latest Remote V2 Re-Check
+### Historical Remote V2 Re-Check
 
 - Latest pushed commit: `90ccc14715f43c4a75f04f78ab361e248fdb022a`.
 - GitHub Actions CI on `main` passed for this commit.
