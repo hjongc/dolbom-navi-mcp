@@ -32,6 +32,7 @@ assert(packageJson.dependencies?.["@modelcontextprotocol/sdk"] === "1.29.0", "MC
 assert(packageJson.scripts?.build, "build script is required");
 assert(packageJson.scripts?.test, "test script is required");
 assert(packageJson.scripts?.smoke, "smoke script is required");
+assert(packageJson.scripts?.["quality:eval"], "quality:eval script is required");
 assert(packageJson.scripts?.inspect?.includes("--cache .npm-cache"), "inspector scripts must use repo-local npm cache");
 assert(packageJson.scripts?.["inspect:tools"]?.includes("--cache .npm-cache"), "inspect:tools must use repo-local npm cache");
 assert(packageJson.scripts?.["inspect:resources"]?.includes("--cache .npm-cache"), "inspect:resources must use repo-local npm cache");
@@ -48,10 +49,17 @@ assert(!/name:\s*"[^"]*kakao[^"]*"/i.test(server), "MCP server name must not inc
 const smoke = readFileSync("scripts/smoke.ts", "utf8");
 assert(/supportedPlayMcpProtocolVersions/.test(smoke), "smoke test must verify PlayMCP-supported MCP protocol negotiation");
 assert(/getServerVersion/.test(smoke), "smoke test must verify MCP server identity");
+assert(/assertInputSchemaDescriptions/.test(smoke), "smoke test must verify Korean input schema descriptions");
+
+const qualityEval = readFileSync("scripts/quality-eval.ts", "utf8");
+assert(/make_family_share_summary/.test(qualityEval), "quality eval must cover family-share output");
+assert(/build_dementia_care_checklist/.test(qualityEval), "quality eval must cover dementia safety output");
+assert(/compare_care_or_support_options/.test(qualityEval), "quality eval must cover facility comparison output");
 
 const ci = readFileSync(".github/workflows/ci.yml", "utf8");
 assert(/docker build --platform linux\/amd64/.test(ci), "CI must verify linux/amd64 Docker build");
-assert(/npm run smoke/.test(ci), "CI must run MCP smoke test");
+assert(/MCP_ENDPOINT=http:\/\/127\.0\.0\.1:3000\/mcp npm run smoke/.test(ci), "CI must run MCP smoke test with an explicit endpoint");
+assert(/MCP_ENDPOINT=http:\/\/127\.0\.0\.1:3000\/mcp npm run quality:eval/.test(ci), "CI must run deterministic MCP quality eval with an explicit endpoint");
 
 const categories = new Set(SOURCES.map(source => source.category));
 for (const category of ["long_term_care", "welfare", "medical", "dementia", "mobility", "facility", "emergency", "local_government"]) {

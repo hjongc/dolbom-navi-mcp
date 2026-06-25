@@ -3,6 +3,28 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 
 const endpoint = process.env.MCP_ENDPOINT;
 const supportedPlayMcpProtocolVersions = new Set(["2025-03-26", "2025-06-18", "2025-11-25"]);
+const englishOnlyDescriptionPattern = /\b(Natural language|City|district|Approximate|resident identifier)\b/i;
+
+function hasKorean(text: unknown): boolean {
+  return typeof text === "string" && /[가-힣]/.test(text);
+}
+
+function assertInputSchemaDescriptions(toolName: string, schema: unknown) {
+  const properties = (schema as { properties?: Record<string, { description?: unknown }> })?.properties;
+  if (!properties) {
+    throw new Error(`Tool ${toolName} is missing input schema properties`);
+  }
+
+  for (const [propertyName, propertySchema] of Object.entries(properties)) {
+    const description = propertySchema.description;
+    if (!hasKorean(description)) {
+      throw new Error(`Tool ${toolName} input ${propertyName} must have a Korean description`);
+    }
+    if (englishOnlyDescriptionPattern.test(String(description))) {
+      throw new Error(`Tool ${toolName} input ${propertyName} still has an English placeholder description`);
+    }
+  }
+}
 
 async function main() {
   if (!endpoint) {
@@ -47,6 +69,9 @@ async function main() {
   }
 
   for (const tool of tools.tools) {
+    if (!hasKorean(tool.title)) {
+      throw new Error(`Tool ${tool.name} title must be Korean`);
+    }
     if (!tool.description || tool.description.length > 1024) {
       throw new Error(`Tool ${tool.name} has missing or too long description`);
     }
@@ -64,6 +89,7 @@ async function main() {
     ) {
       throw new Error(`Tool ${tool.name} is missing required PlayMCP annotations`);
     }
+    assertInputSchemaDescriptions(tool.name, tool.inputSchema);
   }
 
   const calls = [];

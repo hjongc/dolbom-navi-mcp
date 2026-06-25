@@ -181,6 +181,16 @@ test("tool outputs keep a user-facing safety notice for llm summarization", () =
   assert.doesNotMatch(output, /region: unknown/);
 });
 
+test("family care analysis keeps caveat concise without duplicate warning sections", () => {
+  const output = analyzeFamilyCareSituation({
+    situation: "할머니 치매 의심과 장기요양, 어디부터 시작하죠",
+    dementiaStatus: "suspected"
+  });
+
+  assert.match(output, /## 확인 필요/);
+  assert.doesNotMatch(output, /## 주의\n이 결과는 가족 의사결정을 돕는 내비게이션/);
+});
+
 test("family share summary is concise and does not request sensitive identifiers", () => {
   const output = makeFamilyShareSummary({
     situation: "아버지가 병원 이동이 어려움. 연락처 010-1234-5678, 주민번호 440101-1234567",

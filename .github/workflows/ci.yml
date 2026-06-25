@@ -44,7 +44,10 @@ jobs:
           exit 1
 
       - name: Smoke test
-        run: npm run smoke
+        run: MCP_ENDPOINT=http://127.0.0.1:3000/mcp npm run smoke
+
+      - name: Quality eval
+        run: MCP_ENDPOINT=http://127.0.0.1:3000/mcp npm run quality:eval
 
       - name: Stop server
         if: always()
