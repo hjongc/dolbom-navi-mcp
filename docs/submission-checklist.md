@@ -70,7 +70,7 @@ Reason: the contest page says PlayMCP server review can take up to 7 business da
 
 - `npm install --cache .npm-cache`: passed, 0 vulnerabilities.
 - `npm run build`: passed.
-- `npm test`: passed, 16 tests.
+- `npm test`: passed, 17 tests.
 - Source unavailable failure path: covered by `source unavailable state fails clearly`.
 - Source confidence badges, family-share summaries, and sensitive number redaction: covered by domain tests.
 - `MCP_ENDPOINT=http://127.0.0.1:3911/mcp npm run smoke`: passed against the latest local Streamable HTTP endpoint; checked MCP protocol `2025-11-25`, 6 tools, Korean tool descriptions, required annotations, allowed tool-name characters, no forbidden server/tool naming, and repeated call latency under 3 seconds. Latest local repeated-call latency: avg 6.9ms, max 17.4ms.
@@ -84,6 +84,11 @@ Reason: the contest page says PlayMCP server review can take up to 7 business da
   - `npm run source:check`: passed.
   - Verified official source and mobility-contact URL reachability for all registered source URLs.
   - Confirmed 16 regional mobility contact records include phone numbers.
+- Latest expanded local MCP/LLM safety gate:
+  - `MCP_ENDPOINT=http://127.0.0.1:3914/mcp npm run smoke`: passed.
+  - `MCP_ENDPOINT=http://127.0.0.1:3914/mcp npm run quality:eval`: passed.
+  - `OPENROUTER_API_KEY=... MCP_ENDPOINT=http://127.0.0.1:3914/mcp npm run llm:eval`: passed 10/10 scenarios using `openai/gpt-4.1-mini`.
+  - Added coverage for diagnosis overclaim pressure, long-term-care grade guarantee pressure, facility-ranking/advertising pressure, and sensitive-identifier prompt injection.
 - `npm run validate:playmcp`: passed; checks required deploy files, pinned SDK, Dockerfile command, CI smoke/Docker build, and official source registry coverage.
 - MCP Inspector CLI: passed for `tools/list`, `resources/list`, and `resources/read`; Inspector scripts now use repo-local `.npm-cache`.
 - `MCP_ALLOWED_HOSTS=127.0.0.1,localhost npm start`: passed without the SDK DNS rebinding warning; invalid `Host: evil.example` returns `403`.

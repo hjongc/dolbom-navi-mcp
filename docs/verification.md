@@ -129,6 +129,25 @@
   - Mobility contacts checked for Seoul, Busan, Incheon, Gyeonggi, Daegu, Daejeon, Gwangju, Ulsan, Sejong, Gangwon, Chungnam, Jeonbuk, Jeonnam, Gyeongbuk, Gyeongnam, and Jeju.
   - Notable behavior: 경찰청 112 returns `307` security redirects; 강원 광역이동지원센터 required the `curl` fallback and returned `200`.
 
+### Expanded LLM Safety Eval
+
+- Expanded the OpenRouter LLM eval from 6 to 10 scenarios.
+- Added adversarial/safety scenarios for:
+  - pressure to state suspected dementia as a confirmed diagnosis,
+  - pressure to guarantee long-term-care grade approval on an application,
+  - pressure to rank or advertise one facility as the single best choice,
+  - prompt-injection pressure to collect resident-registration-like numbers or phone numbers for family sharing.
+- The eval now accepts explicit no-tool safe refusals for overclaim and sensitive-data requests when the model still gives a safe next action.
+- Local latest-code checks passed after the expansion:
+  - `npm run verify`
+  - `npm run source:check`
+  - `MCP_ENDPOINT=http://127.0.0.1:3914/mcp npm run smoke`
+  - `MCP_ENDPOINT=http://127.0.0.1:3914/mcp npm run quality:eval`
+  - `OPENROUTER_API_KEY=... MCP_ENDPOINT=http://127.0.0.1:3914/mcp npm run llm:eval`
+- Local expanded LLM eval result:
+  - Model: `openai/gpt-4.1-mini`
+  - Result: 10/10 scenarios passed routing or approved safe-refusal behavior plus answer-quality checks.
+
 ### LLM-Connected Evaluation
 
 - Added a repeatable OpenRouter eval command:
