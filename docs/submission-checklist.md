@@ -103,4 +103,5 @@ Reason: the contest page says PlayMCP server review can take up to 7 business da
   - `MCP_ENDPOINT=https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp npm run quality:eval`: passed deterministic MCP quality scenarios.
   - `OPENROUTER_API_KEY=... MCP_ENDPOINT=https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp npm run llm:eval`: passed 10/10 remote LLM-connected scenarios.
   - `npm run source:check`: passed after remote endpoint verification.
-  - Remaining before official review: update or recreate the PlayMCP developer-console temporary registration so it points to the verified `dolbom-navi` endpoint, then run temporary/private console testing.
+  - PlayMCP developer-console temporary registration for `돌봄내비` now shows `MCP 상태 Online`.
+  - Remaining before public/final claim: confirm review status and follow the PlayMCP review/public visibility flow in the console.

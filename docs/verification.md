@@ -205,7 +205,8 @@
   - `npm run source:check`
   - National/public sources and 16 regional mobility contacts passed.
 - Current remaining external step:
-  - PlayMCP developer-console temporary registration still needs to point to this verified endpoint and pass temporary/private console testing before final review request.
+  - PlayMCP developer-console temporary registration now shows `MCP 상태 Online` for `돌봄내비`.
+  - Registration status is still `심사 중`; do not switch to final/public claims until review state is confirmed in the console.
 
 ### Historical Remote V2 Re-Check
 
