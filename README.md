@@ -33,6 +33,12 @@ MCP endpoint:
 http://127.0.0.1:3000/mcp
 ```
 
+For a public deployment, set `MCP_ALLOWED_HOSTS` to the comma-separated hostnames that should be accepted in the HTTP `Host` header. Example:
+
+```bash
+MCP_ALLOWED_HOSTS=127.0.0.1,localhost,your-playmcp-host.example.com npm start
+```
+
 ## Smoke Test
 
 Start the server in one terminal:

@@ -55,6 +55,8 @@ Use these values for the first PlayMCP in KC registration attempt.
 | Dockerfile path | Dockerfile |
 | PAT | Empty if the repository is public |
 
+After the Endpoint URL is issued, set `MCP_ALLOWED_HOSTS` to the issued endpoint hostname if PlayMCP in KC exposes environment-variable configuration. Include only hostnames, separated by commas, without `https://` or path. Keep `127.0.0.1,localhost` for local verification.
+
 Repository status: public GitHub repository created and pushed.
 
 ## Container Image Inputs

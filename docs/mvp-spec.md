@@ -19,7 +19,7 @@ PlayMCP development guide constraints:
 - Keep total tool count at 3-10 tools for the first release.
 - Include `name`, `description`, `inputSchema`, and `annotations` for every tool.
 - Set all annotation fields: `title`, `readOnlyHint`, `destructiveHint`, `openWorldHint`, `idempotentHint`.
-- Keep tool descriptions under 1,024 characters, preferably in English, and include the service name in the description.
+- Keep tool descriptions under 1,024 characters, write the user-facing description in natural Korean, and include the service name in the description.
 - Keep tool results compact and return cleaned text/markdown rather than raw API payloads.
 - Target average tool latency under 100ms where possible; p99 must stay under 3,000ms.
 - Do not design tool responses to expose or induce advertising.

@@ -19,6 +19,8 @@ test("analyzes broad family care situation across multiple support domains", () 
   assert.match(output, /공식 출처/);
   assert.match(output, /정부24/);
   assert.match(output, /국민건강보험공단/);
+  assert.match(output, /\[official_national\]/);
+  assert.match(output, /가족 공유 요약/);
   assert.doesNotMatch(output, /확정합니다/);
 });
 
@@ -39,6 +41,31 @@ test("missing region asks one concise follow-up question", () => {
   });
 
   assert.match(output, /거주지 시·군·구가 어디인가요\?/);
+});
+
+test("explicit medical support area routes to medical guidance", () => {
+  const output = analyzeFamilyCareSituation({
+    situation: "아버지가 퇴원 후 진료비와 의료 지원이 필요해요",
+    region: "서울 관악구",
+    ageRange: "80대",
+    supportArea: "medical"
+  });
+
+  assert.match(output, /의료·진료 지원/);
+  assert.match(output, /보건복지부/);
+  assert.doesNotMatch(output, /구체 분야가 아직 드러나지 않았습니다/);
+});
+
+test("explicit administration support area routes to local government guidance", () => {
+  const output = analyzeFamilyCareSituation({
+    situation: "어느 부서에 신청해야 하는지 행정 창구를 알고 싶어요",
+    region: "서울 관악구",
+    ageRange: "80대",
+    supportArea: "administration"
+  });
+
+  assert.match(output, /행정·지자체 창구/);
+  assert.match(output, /시·군·구청/);
 });
 
 test("mobility route includes verified local mobility contact when region matches", () => {
@@ -82,14 +109,33 @@ test("facility comparison avoids fabricated rankings", () => {
   assert.match(output, /공식 정보/);
 });
 
+test("facility comparison uses care needs and family priorities", () => {
+  const output = compareCareOrSupportOptions({
+    region: "서울 관악구",
+    desiredType: "요양원",
+    careNeeds: "치매와 배회 위험",
+    familyPriorities: "야간 대응과 비용 투명성"
+  });
+
+  assert.match(output, /필요 지원: 치매와 배회 위험/);
+  assert.match(output, /가족 우선순위: 야간 대응과 비용 투명성/);
+  assert.match(output, /치매와 배회 위험/);
+  assert.match(output, /야간 대응과 비용 투명성/);
+});
+
 test("family share summary is concise and does not request sensitive identifiers", () => {
   const output = makeFamilyShareSummary({
-    situation: "아버지가 병원 이동이 어려움",
-    checklist: ["거주지 교통지원 확인", "장기요양등급 여부 확인"]
+    situation: "아버지가 병원 이동이 어려움. 연락처 010-1234-5678, 주민번호 440101-1234567",
+    checklist: ["거주지 교통지원 확인", "장기요양등급 여부 확인", "담당자 02-123-4567에 전화"]
   });
 
   assert.match(output, /가족 공유용 요약/);
   assert.doesNotMatch(output, /주민등록/);
+  assert.doesNotMatch(output, /010-1234-5678/);
+  assert.doesNotMatch(output, /440101-1234567/);
+  assert.doesNotMatch(output, /02-123-4567/);
+  assert.match(output, /\[연락처 생략\]/);
+  assert.match(output, /\[민감번호 생략\]/);
 });
 
 test("source unavailable state fails clearly", () => {

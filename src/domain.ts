@@ -45,6 +45,27 @@ function hasMobilityRoute(routes: RoutedArea[]): boolean {
   return routes.some(route => route.area === "mobility");
 }
 
+function optionalItem(label: string, value?: string): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed ? `${label}: ${trimmed}` : undefined;
+}
+
+function sanitizeUserText(text: string): string {
+  return text
+    .replace(/\b\d{6}-?[1-4]\d{6}\b/g, "[민감번호 생략]")
+    .replace(/\b01[016789]-?\d{3,4}-?\d{4}\b/g, "[연락처 생략]")
+    .replace(/\b0(?:2|[3-6][1-5]|70|80)-?\d{3,4}-?\d{4}\b/g, "[연락처 생략]");
+}
+
+function familyShareSummary(situation: string, firstAction: string): string {
+  return [
+    "## 가족 공유 요약",
+    `현재 상황: ${sanitizeUserText(situation)}`,
+    `이번 주 우선 할 일: ${firstAction}`,
+    "확정 판단이 아니라 가족 논의용 초안이므로, 등급·혜택·입소 가능 여부는 공식 기관에 확인해야 합니다."
+  ].join("\n");
+}
+
 function mobilityContactSection(region: string, routes: RoutedArea[]): string {
   if (!hasMobilityRoute(routes)) return "";
 
@@ -67,13 +88,13 @@ function mobilityContactSection(region: string, routes: RoutedArea[]): string {
 
 function normalizeProfile(input: CareProfileInput): Required<CareProfileInput> {
   return {
-    situation: input.situation.trim(),
-    region: input.region?.trim() || "미확인",
-    ageRange: input.ageRange?.trim() || "미확인",
+    situation: sanitizeUserText(input.situation.trim()),
+    region: sanitizeUserText(input.region?.trim() || "미확인"),
+    ageRange: sanitizeUserText(input.ageRange?.trim() || "미확인"),
     dementiaStatus: input.dementiaStatus || "unknown",
     longTermCareGradeStatus: input.longTermCareGradeStatus || "unknown",
-    mobilityStatus: input.mobilityStatus?.trim() || "미확인",
-    livingSituation: input.livingSituation?.trim() || "미확인",
+    mobilityStatus: sanitizeUserText(input.mobilityStatus?.trim() || "미확인"),
+    livingSituation: sanitizeUserText(input.livingSituation?.trim() || "미확인"),
     supportArea: input.supportArea || "unknown"
   };
 }
@@ -96,6 +117,18 @@ export function routeAreas(input: CareProfileInput): RoutedArea[] {
     });
   }
 
+  if (
+    profile.supportArea === "medical" ||
+    hasAny(text, ["의료", "진료", "병원", "퇴원", "치료", "간병", "의사", "간호", "응급의료", "의료비"])
+  ) {
+    routes.push({
+      area: "medical",
+      label: "의료·진료 지원",
+      reason: "진료, 퇴원, 의료비, 의료기관 상담처럼 의료·보건 경로 확인이 필요한 표현이 포함되어 있습니다.",
+      firstContact: "현재 진료기관 또는 보건복지부·응급의료포털 등 공식 의료 경로에서 상담·기관 정보를 확인하세요."
+    });
+  }
+
   if (profile.dementiaStatus !== "unknown" || hasAny(text, ["치매", "인지", "기억", "배회", "망상"])) {
     routes.push({
       area: "dementia",
@@ -106,8 +139,9 @@ export function routeAreas(input: CareProfileInput): RoutedArea[] {
   }
 
   if (
+    profile.supportArea === "care" ||
     profile.longTermCareGradeStatus !== "unknown" ||
-    hasAny(text, ["장기요양", "등급", "요양", "방문요양", "주야간보호", "거동", "일상생활"])
+    hasAny(text, ["돌봄", "장기요양", "등급", "요양", "방문요양", "주야간보호", "거동", "일상생활"])
   ) {
     routes.push({
       area: "long_term_care",
@@ -135,11 +169,14 @@ export function routeAreas(input: CareProfileInput): RoutedArea[] {
     });
   }
 
-  if (routes.length === 0) {
+  if (profile.supportArea === "administration" || routes.length === 0) {
     routes.push({
       area: "local_government",
-      label: "초기 행정 내비게이션",
-      reason: "구체 분야가 아직 드러나지 않았습니다. 먼저 거주지와 현재 가장 불편한 일을 기준으로 분류해야 합니다.",
+      label: profile.supportArea === "administration" ? "행정·지자체 창구" : "초기 행정 내비게이션",
+      reason:
+        profile.supportArea === "administration"
+          ? "민원, 신청, 지역 담당 창구 확인처럼 지자체 또는 행정기관 연결이 필요한 상황입니다."
+          : "구체 분야가 아직 드러나지 않았습니다. 먼저 거주지와 현재 가장 불편한 일을 기준으로 분류해야 합니다.",
       firstContact: "거주지 주민센터 또는 시·군·구청 노인복지 담당 부서에 현재 상황을 설명하고 담당 창구를 확인하세요."
     });
   }
@@ -202,6 +239,8 @@ export function analyzeFamilyCareSituation(input: CareProfileInput): string {
     "## 주의",
     "이 결과는 가족 의사결정을 돕는 내비게이션이며, 등급·급여·의학적 진단·입소 가능 여부를 확정하지 않습니다. 최종 판단은 공식 기관과 의료진에게 확인해야 합니다.",
     "",
+    familyShareSummary(profile.situation, routes[0]?.firstContact || "거주지와 가장 급한 돌봄 문제를 가족끼리 먼저 정리"),
+    "",
     "## 공식 출처",
     renderSources(sources)
   ].join("\n");
@@ -223,6 +262,8 @@ export function routeSupportOptions(input: CareProfileInput & { mainConcern?: st
     ]),
     "",
     mobilityContactSection(profile.region, routes),
+    "",
+    familyShareSummary(profile.situation, routes[0]?.firstContact || "거주지와 가장 급한 돌봄 문제를 가족끼리 먼저 정리"),
     "",
     "## 공식 출처",
     renderSources(sourcesFor(routes.map(route => route.area)))
@@ -257,6 +298,11 @@ export function explainLongTermCarePath(input: CareProfileInput): string {
       "등급 결과와 관계없이 필요한 지역 돌봄·교통·의료 지원도 같이 확인"
     ]),
     "",
+    familyShareSummary(
+      profile.situation,
+      "장기요양인정 신청 절차와 최근 일상생활 어려움 기록을 먼저 확인"
+    ),
+    "",
     "## 공식 출처",
     renderSources(sourcesFor(["long_term_care", "welfare", "local_government"]))
   ].join("\n");
@@ -264,7 +310,7 @@ export function explainLongTermCarePath(input: CareProfileInput): string {
 
 export function buildDementiaCareChecklist(input: { dementiaStatus?: CareProfileInput["dementiaStatus"]; region?: string; situation?: string }): string {
   const status = input.dementiaStatus || "unknown";
-  const situation = input.situation || "";
+  const situation = sanitizeUserText(input.situation || "");
   if (detectEmergency(situation)) {
     return [
       "## 먼저 안전 확인",
@@ -304,15 +350,36 @@ export function buildDementiaCareChecklist(input: { dementiaStatus?: CareProfile
     "## 주의",
     "이 도구는 치매를 진단하지 않습니다. 의심 증상이 있으면 전문 평가가 필요합니다.",
     "",
+    familyShareSummary(
+      situation || "치매·인지건강 관련 가족 확인이 필요함",
+      `${sanitizeUserText(input.region || "거주지")} 치매안심센터 또는 의료기관 상담 경로 확인`
+    ),
+    "",
     "## 공식 출처",
     renderSources(sourcesFor(["dementia", "medical", "long_term_care"]))
   ].join("\n");
 }
 
 export function compareCareOrSupportOptions(input: { region?: string; desiredType?: string; careNeeds?: string; familyPriorities?: string }): string {
+  const region = sanitizeUserText(input.region || "미확인");
+  const desiredType = sanitizeUserText(input.desiredType || "미확인");
+  const careNeeds = sanitizeUserText(input.careNeeds?.trim() || "");
+  const familyPriorities = sanitizeUserText(input.familyPriorities?.trim() || "");
+  const context = [
+    optionalItem("필요 지원", careNeeds),
+    optionalItem("가족 우선순위", familyPriorities)
+  ].filter((item): item is string => Boolean(item));
+  const priorityQuestion = familyPriorities
+    ? `가족 우선순위인 '${familyPriorities}'을 기준으로 비용, 야간 대응, 소통 방식 중 어떤 항목을 계약서나 공식 설명으로 확인할 수 있나요?`
+    : "가족이 가장 중요하게 보는 기준 2가지를 충족하는지 공식 설명과 상담 답변으로 확인할 수 있나요?";
+  const careNeedQuestion = careNeeds
+    ? `어르신의 '${careNeeds}' 상황에서 이용 제한, 추가 비용, 야간·응급 대응 기준은 무엇인가요?`
+    : "현재 어르신 상태에서 이용 가능 여부를 판단하려면 어떤 정보를 준비해야 하나요?";
+
   return [
     "## 비교 대상",
-    `지역: ${input.region || "미확인"} / 희망 유형: ${input.desiredType || "미확인"}`,
+    `지역: ${region} / 희망 유형: ${desiredType}`,
+    context.length > 0 ? lineItems(context) : "- 필요 지원과 가족 우선순위가 있으면 비교 질문을 더 구체화할 수 있습니다.",
     "",
     "## 비교 기준",
     lineItems([
@@ -326,15 +393,21 @@ export function compareCareOrSupportOptions(input: { region?: string; desiredTyp
     "",
     "## 전화 상담 질문",
     lineItems([
-      "현재 어르신 상태에서 이용 가능 여부를 판단하려면 어떤 정보를 준비해야 하나요?",
+      careNeedQuestion,
       "장기요양등급이 없거나 신청 중이어도 상담이 가능한가요?",
       "인력 배치, 야간 대응, 응급 이송 절차는 어떻게 되나요?",
       "인지저하·배회·낙상 위험이 있을 때 관리 방식은 무엇인가요?",
-      "계약 전 가족이 직접 확인해야 할 서류와 비용 항목은 무엇인가요?"
+      "계약 전 가족이 직접 확인해야 할 서류와 비용 항목은 무엇인가요?",
+      priorityQuestion
     ]),
     "",
     "## 주의",
     "이 도구는 특정 기관 순위를 만들지 않습니다. 검증되지 않은 리뷰나 광고 문구를 근거로 추천하지 말고, 공식 정보와 직접 상담 내용을 함께 확인하세요.",
+    "",
+    familyShareSummary(
+      `${region}에서 ${desiredType} 비교 필요`,
+      "공식 등록·평가 정보, 야간·응급 대응, 비용 항목을 같은 질문표로 확인"
+    ),
     "",
     "## 공식 출처",
     renderSources(sourcesFor(["facility", "long_term_care", "local_government", "medical"]))
@@ -352,11 +425,11 @@ export function makeFamilyShareSummary(input: { situation: string; recommendedPa
 
   return [
     "[가족 공유용 요약]",
-    `현재 상황: ${input.situation}`,
-    `우선 경로: ${input.recommendedPath || "복지·의료·돌봄·교통·시설 중 해당 영역을 먼저 분류하고 공식 기관에 확인"}`,
+    `현재 상황: ${sanitizeUserText(input.situation)}`,
+    `우선 경로: ${sanitizeUserText(input.recommendedPath || "복지·의료·돌봄·교통·시설 중 해당 영역을 먼저 분류하고 공식 기관에 확인")}`,
     "",
     "이번 주 할 일",
-    checklist.map((item, index) => `${index + 1}. ${item}`).join("\n"),
+    checklist.map((item, index) => `${index + 1}. ${sanitizeUserText(item)}`).join("\n"),
     "",
     "주의: 이 내용은 가족 논의를 돕기 위한 정리이며, 혜택 대상 여부·의학적 판단·입소 가능 여부는 공식 기관과 의료진에게 확인해야 합니다."
   ].join("\n");

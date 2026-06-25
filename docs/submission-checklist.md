@@ -70,11 +70,13 @@ Reason: the contest page says PlayMCP server review can take up to 7 business da
 
 - `npm install --cache .npm-cache`: passed, 0 vulnerabilities.
 - `npm run build`: passed.
-- `npm test`: passed, 7 tests.
+- `npm test`: passed, 12 tests.
 - Source unavailable failure path: covered by `source unavailable state fails clearly`.
-- `npm run smoke`: passed against local Streamable HTTP endpoint; checked 6 tools, required annotations, allowed tool-name characters, no forbidden server/tool naming, and repeated call latency under 3 seconds. Latest local repeated-call latency: avg 3.4ms, max 6.4ms.
+- Source confidence badges, family-share summaries, and sensitive number redaction: covered by domain tests.
+- `npm run smoke`: passed against local Streamable HTTP endpoint; checked MCP protocol `2025-11-25`, 6 tools, required annotations, allowed tool-name characters, no forbidden server/tool naming, and repeated call latency under 3 seconds. Latest local repeated-call latency: avg 3.1ms, max 7.9ms.
 - `npm run validate:playmcp`: passed; checks required deploy files, pinned SDK, Dockerfile command, CI smoke/Docker build, and official source registry coverage.
-- MCP Inspector CLI: passed for `tools/list`, representative `tools/call`, `resources/list`, and `resources/read`.
+- MCP Inspector CLI: passed for `tools/list`, `resources/list`, and `resources/read`; Inspector scripts now use repo-local `.npm-cache`.
+- `MCP_ALLOWED_HOSTS=127.0.0.1,localhost npm start`: passed without the SDK DNS rebinding warning; invalid `Host: evil.example` returns `403`.
 - `curl http://127.0.0.1:3000/healthz`: passed.
 - `docker build --platform linux/amd64 -t dolbom-navi-mcp:local .`: passed.
-- Container smoke test on `http://127.0.0.1:3100/mcp`: passed; latest repeated-call latency avg 9.5ms, max 18.9ms.
+- Container smoke test on `http://127.0.0.1:3100/mcp`: passed; latest repeated-call latency avg 8.9ms, max 14.9ms.

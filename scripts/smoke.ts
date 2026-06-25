@@ -2,6 +2,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
 const endpoint = process.env.MCP_ENDPOINT || "http://127.0.0.1:3000/mcp";
+const supportedPlayMcpProtocolVersions = new Set(["2025-03-26", "2025-06-18", "2025-11-25"]);
 
 async function main() {
   const client = new Client({
@@ -11,6 +12,17 @@ async function main() {
 
   const transport = new StreamableHTTPClientTransport(new URL(endpoint));
   await client.connect(transport);
+
+  const protocolVersion = transport.protocolVersion;
+  console.log(`protocol=${protocolVersion}`);
+  if (!protocolVersion || !supportedPlayMcpProtocolVersions.has(protocolVersion)) {
+    throw new Error(`Negotiated protocol version is outside the PlayMCP-supported range: ${protocolVersion ?? "unknown"}`);
+  }
+
+  const serverVersion = client.getServerVersion();
+  if (!serverVersion?.name || /kakao/i.test(serverVersion.name)) {
+    throw new Error(`Server name is missing or contains forbidden kakao string: ${serverVersion?.name ?? "unknown"}`);
+  }
 
   const tools = await client.listTools();
   const names = tools.tools.map(tool => tool.name).sort();
@@ -31,6 +43,9 @@ async function main() {
   for (const tool of tools.tools) {
     if (!tool.description || tool.description.length > 1024) {
       throw new Error(`Tool ${tool.name} has missing or too long description`);
+    }
+    if (!/[가-힣]/.test(tool.description) || !tool.description.includes("돌봄내비")) {
+      throw new Error(`Tool ${tool.name} description must be natural Korean and include 돌봄내비`);
     }
     const annotations = tool.annotations;
     if (

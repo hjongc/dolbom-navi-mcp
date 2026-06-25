@@ -32,10 +32,22 @@ assert(packageJson.dependencies?.["@modelcontextprotocol/sdk"] === "1.29.0", "MC
 assert(packageJson.scripts?.build, "build script is required");
 assert(packageJson.scripts?.test, "test script is required");
 assert(packageJson.scripts?.smoke, "smoke script is required");
+assert(packageJson.scripts?.inspect?.includes("--cache .npm-cache"), "inspector scripts must use repo-local npm cache");
+assert(packageJson.scripts?.["inspect:tools"]?.includes("--cache .npm-cache"), "inspect:tools must use repo-local npm cache");
+assert(packageJson.scripts?.["inspect:resources"]?.includes("--cache .npm-cache"), "inspect:resources must use repo-local npm cache");
 
 const dockerfile = readFileSync("Dockerfile", "utf8");
 assert(/EXPOSE 3000/.test(dockerfile), "Dockerfile must expose port 3000");
 assert(/CMD \["node", "dist\/src\/server\.js"\]/.test(dockerfile), "Dockerfile CMD must start built server");
+
+const server = readFileSync("src/server.ts", "utf8");
+assert(/MCP_ALLOWED_HOSTS/.test(server), "server must support MCP_ALLOWED_HOSTS for host header protection on public deployments");
+assert(/name:\s*"dolbom-navi"/.test(server), "MCP server name must be the contest-facing dolbom-navi name");
+assert(!/name:\s*"[^"]*kakao[^"]*"/i.test(server), "MCP server name must not include kakao");
+
+const smoke = readFileSync("scripts/smoke.ts", "utf8");
+assert(/supportedPlayMcpProtocolVersions/.test(smoke), "smoke test must verify PlayMCP-supported MCP protocol negotiation");
+assert(/getServerVersion/.test(smoke), "smoke test must verify MCP server identity");
 
 const ci = readFileSync(".github/workflows/ci.yml", "utf8");
 assert(/docker build --platform linux\/amd64/.test(ci), "CI must verify linux/amd64 Docker build");

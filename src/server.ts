@@ -40,6 +40,11 @@ function textResult(text: string) {
   };
 }
 
+function allowedHostsFromEnv(): string[] | undefined {
+  const hosts = process.env.MCP_ALLOWED_HOSTS?.split(",").map(host => host.trim()).filter(Boolean);
+  return hosts && hosts.length > 0 ? hosts : undefined;
+}
+
 export function createServer(): McpServer {
   const server = new McpServer(
     {
@@ -59,7 +64,7 @@ export function createServer(): McpServer {
     {
       title: "Analyze Family Care Situation",
       description:
-        "Dolbom Navi(돌봄내비) analyzes a Korean elder-care family situation and routes it across welfare, medical, care, mobility, facility, dementia, and long-term-care support areas using official-source guidance.",
+        "돌봄내비가 부모님·조부모님 돌봄 상황을 파악해 복지·의료·교통 등 필요한 공공 지원 경로와 다음 확인 사항을 공식 출처 기반으로 정리합니다.",
       inputSchema: {
         situation: z.string().min(2).describe("Natural language description of the family elder-care situation."),
         region: z.string().optional().describe("City, district, or local area if known."),
@@ -70,7 +75,7 @@ export function createServer(): McpServer {
         livingSituation: z.string().optional(),
         supportArea: z.enum(["welfare", "medical", "care", "mobility", "facility", "administration", "unknown"]).optional()
       },
-      annotations: readOnlyAnnotations("Analyze family elder-care situation")
+      annotations: readOnlyAnnotations("가족 돌봄 상황 분석")
     },
     async input => textResult(analyzeFamilyCareSituation(input))
   );
@@ -80,7 +85,7 @@ export function createServer(): McpServer {
     {
       title: "Route Senior Support Options",
       description:
-        "Dolbom Navi(돌봄내비) maps a senior-support concern to likely official support paths such as welfare, medical, mobility, long-term care, dementia support, facilities, or local administration.",
+        "돌봄내비가 돌봄 고민을 입력받아 복지·의료·교통 등 관련 지원 영역을 분류하고, 문의·신청을 시작할 공식 경로를 안내합니다.",
       inputSchema: {
         situation: z.string().min(2),
         mainConcern: z.string().optional(),
@@ -92,7 +97,7 @@ export function createServer(): McpServer {
         livingSituation: z.string().optional(),
         supportArea: z.enum(["welfare", "medical", "care", "mobility", "facility", "administration", "unknown"]).optional()
       },
-      annotations: readOnlyAnnotations("Route support options")
+      annotations: readOnlyAnnotations("지원 경로 안내")
     },
     async input => textResult(routeSupportOptions(input))
   );
@@ -102,7 +107,7 @@ export function createServer(): McpServer {
     {
       title: "Explain Long Term Care Path",
       description:
-        "Dolbom Navi(돌봄내비) explains the Korean long-term care navigation path in plain language and lists family preparation steps without deciding eligibility or grade approval.",
+        "돌봄내비가 장기요양 인정 신청부터 등급 판정 이후 준비까지 가족이 알아야 할 흐름을 쉬운 말로 설명합니다.",
       inputSchema: {
         situation: z.string().min(2),
         region: z.string().optional(),
@@ -113,7 +118,7 @@ export function createServer(): McpServer {
         livingSituation: z.string().optional(),
         supportArea: z.enum(["welfare", "medical", "care", "mobility", "facility", "administration", "unknown"]).optional()
       },
-      annotations: readOnlyAnnotations("Explain long-term care path")
+      annotations: readOnlyAnnotations("장기요양 절차 설명")
     },
     async input => textResult(explainLongTermCarePath(input))
   );
@@ -123,13 +128,13 @@ export function createServer(): McpServer {
     {
       title: "Build Dementia Care Checklist",
       description:
-        "Dolbom Navi(돌봄내비) builds a non-diagnostic dementia and cognitive-care checklist for families, including observation notes, safety flags, and official support paths.",
+        "돌봄내비가 치매 의심·진단 상황에서 가족이 관찰할 변화, 안전 확인 사항, 공식 상담·지원 경로를 체크리스트로 정리합니다.",
       inputSchema: {
         dementiaStatus: z.enum(["suspected", "diagnosed", "unknown", "severe_symptoms"]).optional(),
         region: z.string().optional(),
         situation: z.string().optional()
       },
-      annotations: readOnlyAnnotations("Build dementia care checklist")
+      annotations: readOnlyAnnotations("치매 돌봄 체크리스트")
     },
     async input => textResult(buildDementiaCareChecklist(input))
   );
@@ -139,14 +144,14 @@ export function createServer(): McpServer {
     {
       title: "Compare Care Or Support Options",
       description:
-        "Dolbom Navi(돌봄내비) creates a source-conscious comparison checklist and phone script for care facilities, mobility support, local services, or other senior-support options without ranking unverified providers.",
+        "돌봄내비가 요양시설, 이동 지원, 지역 서비스 등 여러 선택지를 비교할 때 확인해야 할 질문과 전화 문의 문안을 정리합니다.",
       inputSchema: {
         region: z.string().optional(),
         desiredType: z.string().optional(),
         careNeeds: z.string().optional(),
         familyPriorities: z.string().optional()
       },
-      annotations: readOnlyAnnotations("Compare care or support options")
+      annotations: readOnlyAnnotations("돌봄 선택지 비교")
     },
     async input => textResult(compareCareOrSupportOptions(input))
   );
@@ -156,13 +161,13 @@ export function createServer(): McpServer {
     {
       title: "Make Family Share Summary",
       description:
-        "Dolbom Navi(돌봄내비) turns a senior-support situation and checklist into a concise Korean family-chat summary for coordination, while avoiding sensitive identifiers.",
+        "돌봄내비가 가족 단톡방에 공유하기 좋도록 현재 상황, 확인할 일, 역할 분담 초안을 민감정보 없이 짧게 정리합니다.",
       inputSchema: {
         situation: z.string().min(2),
         recommendedPath: z.string().optional(),
         checklist: z.array(z.string()).optional()
       },
-      annotations: readOnlyAnnotations("Make family share summary")
+      annotations: readOnlyAnnotations("가족 공유용 요약")
     },
     async input => textResult(makeFamilyShareSummary(input))
   );
@@ -190,7 +195,8 @@ export function createServer(): McpServer {
 }
 
 export function createApp() {
-  const app = createMcpExpressApp({ host: "0.0.0.0" });
+  const allowedHosts = allowedHostsFromEnv();
+  const app = createMcpExpressApp(allowedHosts ? { host: "0.0.0.0", allowedHosts } : { host: "0.0.0.0" });
 
   app.get("/", (_req: Request, res: Response) => {
     res.type("text/plain").send(`${SERVICE_NAME} MCP server is running. Use POST /mcp for Streamable HTTP.`);

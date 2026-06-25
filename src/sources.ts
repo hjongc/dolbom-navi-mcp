@@ -332,7 +332,7 @@ export function renderSources(sources: SourceRecord[]): string {
   }
 
   return sources
-    .map(source => `- ${source.sourceName}: ${source.url} (검토일: ${source.reviewedAt})`)
+    .map(source => `- [${source.confidence}] ${source.sourceName}: ${source.url} (검토일: ${source.reviewedAt})`)
     .join("\n");
 }
 
