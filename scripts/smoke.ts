@@ -1,10 +1,16 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
-const endpoint = process.env.MCP_ENDPOINT || "http://127.0.0.1:3000/mcp";
+const endpoint = process.env.MCP_ENDPOINT;
 const supportedPlayMcpProtocolVersions = new Set(["2025-03-26", "2025-06-18", "2025-11-25"]);
 
 async function main() {
+  if (!endpoint) {
+    throw new Error(
+      "MCP_ENDPOINT is required. Example: MCP_ENDPOINT=http://127.0.0.1:3000/mcp npm run smoke"
+    );
+  }
+
   const client = new Client({
     name: "dolbom-navi-smoke-client",
     version: "0.1.0"

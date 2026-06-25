@@ -71,6 +71,17 @@
 
 ## 2026-06-25
 
+### Current Remote Status
+
+- Latest local code is ahead of the last verified PlayMCP in KC deployment.
+- Current production-readiness boundary:
+  - Local build, unit tests, PlayMCP manifest validation, local MCP smoke, and local LLM-connected eval pass.
+  - A newly deployed or refreshed KC endpoint still needs to pass remote MCP smoke and remote LLM-connected eval before final review.
+- Re-check against the previous endpoint failed:
+  - `MCP_ENDPOINT=https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp npm run smoke`
+  - Result: failed before MCP negotiation with `fetch failed` / `redirect count exceeded`.
+- Do not claim the previous endpoint is production-ready until the live endpoint is redeployed and re-verified.
+
 ### LLM-Connected Evaluation
 
 - Added a repeatable OpenRouter eval command:
@@ -87,7 +98,7 @@
   - Tool outputs now include a clear user-facing "확인 필요" section so LLM summarization is more likely to retain official-confirmation boundaries.
   - Explicit support-area intent now takes priority in route ordering, so a mobility-focused prompt with medical keywords returns `이동·교통·병원동행` before `의료·진료 지원`.
   - Added tests for placeholder leakage, Korean enum labels, explicit mobility-priority routing, and final-answer safety notices.
-- Local LLM eval after the fix passed with `MCP_ENDPOINT=http://127.0.0.1:3000/mcp` using OpenRouter model `openai/gpt-4.1-mini`.
+- Local LLM eval after the fix passed with `MCP_ENDPOINT=http://127.0.0.1:3911/mcp` using OpenRouter model `openai/gpt-4.1-mini`.
   - Prompt 1: `할머니 치매 의심과 장기요양, 어디부터 시작하죠`
     - Routed to an appropriate care/dementia tool.
     - Final answer retained official-confirmation caveat and no `unknown` leakage.

@@ -70,15 +70,20 @@ Reason: the contest page says PlayMCP server review can take up to 7 business da
 
 - `npm install --cache .npm-cache`: passed, 0 vulnerabilities.
 - `npm run build`: passed.
-- `npm test`: passed, 12 tests.
+- `npm test`: passed, 16 tests.
 - Source unavailable failure path: covered by `source unavailable state fails clearly`.
 - Source confidence badges, family-share summaries, and sensitive number redaction: covered by domain tests.
-- `npm run smoke`: passed against local Streamable HTTP endpoint; checked MCP protocol `2025-11-25`, 6 tools, required annotations, allowed tool-name characters, no forbidden server/tool naming, and repeated call latency under 3 seconds. Latest local repeated-call latency: avg 3.1ms, max 7.9ms.
+- `MCP_ENDPOINT=http://127.0.0.1:3911/mcp npm run smoke`: passed against the latest local Streamable HTTP endpoint; checked MCP protocol `2025-11-25`, 6 tools, Korean tool descriptions, required annotations, allowed tool-name characters, no forbidden server/tool naming, and repeated call latency under 3 seconds. Latest local repeated-call latency: avg 6.9ms, max 17.4ms.
+- `OPENROUTER_API_KEY=... MCP_ENDPOINT=http://127.0.0.1:3911/mcp npm run llm:eval`: passed 6/6 local LLM-connected scenarios using `openai/gpt-4.1-mini`.
 - `npm run validate:playmcp`: passed; checks required deploy files, pinned SDK, Dockerfile command, CI smoke/Docker build, and official source registry coverage.
 - MCP Inspector CLI: passed for `tools/list`, `resources/list`, and `resources/read`; Inspector scripts now use repo-local `.npm-cache`.
 - `MCP_ALLOWED_HOSTS=127.0.0.1,localhost npm start`: passed without the SDK DNS rebinding warning; invalid `Host: evil.example` returns `403`.
 - `curl http://127.0.0.1:3000/healthz`: passed.
 - `docker build --platform linux/amd64 -t dolbom-navi-mcp:local .`: passed.
 - Container smoke test on `http://127.0.0.1:3100/mcp`: passed; latest repeated-call latency avg 8.9ms, max 14.9ms.
-- PlayMCP in KC Git-source deployment from GitHub `main` commit `0f793c8`: passed.
-- PlayMCP Endpoint `https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp`: Active; remote `npm run smoke` passed with protocol `2025-11-25`, 6 tools, Korean tool descriptions, avg latency 24.0ms, max 31.3ms.
+- Historical PlayMCP in KC Git-source deployment from GitHub `main` commit `0f793c8`: passed on 2026-06-24.
+- Current remote status on 2026-06-25: not production-ready until redeployed and re-verified.
+  - Previous PlayMCP endpoint `https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp` failed the latest smoke re-check with `fetch failed` / `redirect count exceeded`.
+  - Before final review, the active KC endpoint must pass:
+    - `MCP_ENDPOINT=<kc-endpoint>/mcp npm run smoke`
+    - `OPENROUTER_API_KEY=... MCP_ENDPOINT=<kc-endpoint>/mcp npm run llm:eval`

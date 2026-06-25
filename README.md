@@ -50,7 +50,17 @@ npm start
 Run the Streamable HTTP smoke test in another terminal:
 
 ```bash
-npm run smoke
+MCP_ENDPOINT=http://127.0.0.1:3000/mcp npm run smoke
+```
+
+`MCP_ENDPOINT` is required on purpose. This avoids accidentally testing another
+service that happens to be running on port 3000.
+
+For LLM-connected evaluation, provide both the OpenRouter key and the exact MCP
+endpoint being reviewed:
+
+```bash
+OPENROUTER_API_KEY=... MCP_ENDPOINT=http://127.0.0.1:3000/mcp npm run llm:eval
 ```
 
 ## Inspector
@@ -77,6 +87,13 @@ Use the Git source build path:
 - PAT: empty if the repository is public
 
 After PlayMCP in KC returns an Endpoint URL, register it in the PlayMCP developer console and test as a temporary registration before requesting review.
+
+Before review, run both checks against the returned endpoint:
+
+```bash
+MCP_ENDPOINT=https://your-server.playmcp-endpoint.kakaocloud.io/mcp npm run smoke
+OPENROUTER_API_KEY=... MCP_ENDPOINT=https://your-server.playmcp-endpoint.kakaocloud.io/mcp npm run llm:eval
+```
 
 ## Official Source Categories
 

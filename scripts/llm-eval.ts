@@ -24,11 +24,19 @@ type EvalCase = {
 
 const apiKey = process.env.OPENROUTER_API_KEY;
 const model = process.env.OPENROUTER_MODEL || "openai/gpt-4.1-mini";
-const mcpEndpoint = process.env.MCP_ENDPOINT || "https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp";
+const mcpEndpoint = process.env.MCP_ENDPOINT;
 
 if (!apiKey) {
   throw new Error("OPENROUTER_API_KEY is required. Export it only in your shell; do not commit it.");
 }
+
+if (!mcpEndpoint) {
+  throw new Error(
+    "MCP_ENDPOINT is required. Example: MCP_ENDPOINT=https://your-server.playmcp-endpoint.kakaocloud.io/mcp npm run llm:eval"
+  );
+}
+
+const endpoint = mcpEndpoint;
 
 const evalCases: EvalCase[] = [
   {
@@ -129,7 +137,7 @@ async function openRouterChat(
 
 async function main() {
   const client = new Client({ name: "dolbom-navi-llm-eval", version: "0.1.0" });
-  const transport = new StreamableHTTPClientTransport(new URL(mcpEndpoint));
+  const transport = new StreamableHTTPClientTransport(new URL(endpoint));
   await client.connect(transport);
 
   const toolList = await client.listTools();
@@ -143,7 +151,7 @@ async function main() {
   }));
 
   console.log(`model=${model}`);
-  console.log(`mcp_endpoint=${mcpEndpoint}`);
+  console.log(`mcp_endpoint=${endpoint}`);
   console.log(`tools=${toolList.tools.map(tool => tool.name).join(",")}`);
 
   let failures = 0;
