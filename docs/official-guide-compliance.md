@@ -45,13 +45,13 @@ Primary sources include:
 - 119
 - 경찰청 112
 
-## Known External Gap
+## Current External Status
 
-PlayMCP in KC endpoint issuance still depends on the live PlayMCP in KC service. During setup, the page returned:
+PlayMCP in KC endpoint issuance is complete.
 
-```text
-Internal Server Error
-Failed to retrieve connector list.
-```
+- Server ID: `618`
+- Status: `Active`
+- Endpoint: `https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp`
+- Remote MCP smoke and full remote tool/resource checks passed.
 
-The error was reproduced in Microsoft Edge on 2026-06-24 after PlayMCP login. The repository is public, pushed, verified, and prepared for Git source build once that external service is available.
+Remaining external steps are PlayMCP developer-console registration, temporary/private testing in PlayMCP, review request, public visibility after approval, and AGENTIC PLAYER 10 preliminary submission.

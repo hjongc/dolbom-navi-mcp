@@ -49,7 +49,7 @@ Use these values for the first PlayMCP in KC registration attempt.
 | Field | Value |
 | --- | --- |
 | MCP server name | dolbom-navi |
-| Description | Family senior-support navigation MCP for welfare, care, medical, mobility, facility, and local-service guidance. |
+| Description | 부모님·조부모님 돌봄 상황에서 필요한 복지·의료·교통 등 공공 지원 정보를 공식 출처 기반으로 쉽게 찾아보고, 다음 행동까지 정리해주는 MCP입니다. |
 | Git URL | https://github.com/hjongc/dolbom-navi-mcp |
 | Branch / ref | main |
 | Dockerfile path | Dockerfile |
@@ -83,19 +83,20 @@ docker build --platform linux/amd64 -t <image>:<tag> .
 
 ## Blocking Items
 
-- PlayMCP in KC Endpoint issuance is currently blocked externally.
-  - Retested in Microsoft Edge on 2026-06-24 after Kakao/PlayMCP login.
-  - Page still shows `Internal Server Error` and `Failed to retrieve connector list.`
-- MCP Inspector CLI passed. Browser UI review can still be used as a final manual sanity check before PlayMCP review.
+- PlayMCP in KC Endpoint issuance is no longer blocked.
+  - Server ID: `618`
+  - Status: `Active`
+  - Endpoint: `https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp`
+- MCP Inspector CLI and remote MCP checks passed. Browser UI review can still be used as a final manual sanity check before PlayMCP review.
 
 ## Next Work
 
-1. Reopen PlayMCP in KC after the external connector-list error is resolved.
-2. Register the Git source build in PlayMCP in KC.
-3. Copy the issued Endpoint URL.
-4. Register the Endpoint URL in PlayMCP as a temporary server.
-5. Run PlayMCP temporary-registration tests and, optionally, Inspector browser UI.
-6. Request final PlayMCP review.
+1. Register the issued Endpoint URL in the PlayMCP developer console.
+2. Save it as a temporary/private registration first.
+3. Run PlayMCP temporary-registration tests and, optionally, Inspector browser UI.
+4. Request final PlayMCP review.
+5. After approval, change visibility from `나에게만 공개` to `전체 공개`.
+6. Submit through the AGENTIC PLAYER 10 preliminary participation form.
 
 ## PlayMCP Server Development Requirements
 
