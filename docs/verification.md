@@ -53,10 +53,15 @@
   - `Host: evil.example` is rejected with `403 Invalid Host`.
 - Confirmed user-provided resident-registration-like numbers and phone numbers are redacted in user-facing summaries while official source phone numbers remain available where intentionally curated.
 - Added CI workflow for build, test, smoke, and linux/amd64 Docker build on GitHub-hosted runners.
+- Issued and verified the PlayMCP in KC Endpoint after deploying GitHub `main` commit `0f793c8`.
+  - Endpoint: `https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp`
+  - PlayMCP server ID: `618`
+  - Status: `Active`
+  - Confirmed PlayMCP detail page lists all 6 tools with Korean user-facing descriptions.
+  - `MCP_ENDPOINT=https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp npm run smoke`: passed.
+  - Remote smoke latency: avg 24.0ms, max 31.3ms.
 
 ### Not Verified Yet
 
 - MCP Inspector browser UI review.
   - Inspector CLI passed, but the browser UI can still be used as a final manual sanity check before PlayMCP review.
-- PlayMCP in KC Endpoint issuance.
-  - Blocked externally by PlayMCP in KC auth page showing `Internal Server Error: Failed to retrieve connector list.`

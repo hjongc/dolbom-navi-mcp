@@ -80,3 +80,5 @@ Reason: the contest page says PlayMCP server review can take up to 7 business da
 - `curl http://127.0.0.1:3000/healthz`: passed.
 - `docker build --platform linux/amd64 -t dolbom-navi-mcp:local .`: passed.
 - Container smoke test on `http://127.0.0.1:3100/mcp`: passed; latest repeated-call latency avg 8.9ms, max 14.9ms.
+- PlayMCP in KC Git-source deployment from GitHub `main` commit `0f793c8`: passed.
+- PlayMCP Endpoint `https://dolbom-navi.playmcp-endpoint.kakaocloud.io/mcp`: Active; remote `npm run smoke` passed with protocol `2025-11-25`, 6 tools, Korean tool descriptions, avg latency 24.0ms, max 31.3ms.
